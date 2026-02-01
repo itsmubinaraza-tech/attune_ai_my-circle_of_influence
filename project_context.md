@@ -96,7 +96,7 @@
 - Integrated AddPersonModal and PersonProfileModal
 - Navigation links from Index page (desktop and mobile)
 - 23 tests added
-- **Commit:** (pending)
+- **Commit:** `397906b`
 
 ### Phase 4: Visual Polish (COMPLETE)
 
