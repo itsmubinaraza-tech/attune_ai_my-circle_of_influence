@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import MoodSelector from "@/components/attune/MoodSelector";
 import PersonSearch from "@/components/attune/PersonSearch";
 import OutcomeSelector from "@/components/attune/OutcomeSelector";
 import ThemeSelector, { type ThemeName } from "@/components/attune/ThemeSelector";
-import { ArrowRight, Sparkles, Clock, AlertCircle, MessageSquare, Menu, X, UserPlus, Briefcase, Heart, Users, Phone, MessageCircle, Copy, Check } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { ArrowRight, Sparkles, Clock, AlertCircle, MessageSquare, Menu, X, UserPlus, Briefcase, Heart, Users, Phone, MessageCircle, Copy, Check, LogOut } from "lucide-react";
+import { toast } from "sonner";
 
 export type Mood = "calm" | "anxious" | "frustrated" | "hopeful" | "tired" | "motivated" | "uncertain" | "confident";
 export type ContextType = "work" | "family" | "friends" | null;
@@ -65,6 +68,8 @@ const groupColors = {
 };
 
 const Index = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
@@ -79,6 +84,16 @@ const Index = () => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedAttentionPerson, setSelectedAttentionPerson] = useState<typeof needsAttention[0] | null>(null);
   const [copiedMessage, setCopiedMessage] = useState(false);
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error("Failed to sign out");
+    } else {
+      toast.success("Signed out successfully");
+      navigate("/signin");
+    }
+  };
 
 
   // Load theme from localStorage on mount
@@ -252,6 +267,13 @@ const Index = () => {
                 <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Circle</a>
                 <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Reflect</a>
                 <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Me</a>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors flex items-center gap-1"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
               </nav>
               <ThemeSelector
                 currentTheme={currentTheme}
@@ -274,6 +296,15 @@ const Index = () => {
                   <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">My Circle</a>
                   <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Reflect</a>
                   <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Profile</a>
+                  <div className="border-t border-white/10 pt-2 mt-2">
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               </motion.nav>
             )}
