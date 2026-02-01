@@ -1,0 +1,821 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base Colors - Dark Liquid Glass Theme */
+    --background: 240 15% 9%;
+    --foreground: 0 0% 98%;
+    
+    --card: 240 15% 12%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 240 15% 12%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 250 100% 70%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 240 15% 18%;
+    --secondary-foreground: 0 0% 95%;
+    
+    --muted: 240 15% 25%;
+    --muted-foreground: 0 0% 65%;
+    
+    --accent: 280 80% 65%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 240 15% 20%;
+    --input: 240 15% 18%;
+    --ring: 250 100% 70%;
+    
+    --radius: 1rem;
+    
+    /* Context Colors */
+    --context-work: 239 84% 67%;
+    --context-family: 330 81% 70%;
+    --context-friends: 160 64% 52%;
+    
+    /* Mood Colors */
+    --mood-calm: 180 60% 65%;
+    --mood-anxious: 280 70% 65%;
+    --mood-frustrated: 15 80% 60%;
+    --mood-hopeful: 45 90% 65%;
+    --mood-tired: 220 50% 60%;
+    --mood-motivated: 140 70% 55%;
+    --mood-uncertain: 200 60% 60%;
+    --mood-confident: 330 70% 65%;
+    
+    /* Glass Effect Variables */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: rgba(0, 0, 0, 0.3);
+    --glass-highlight: rgba(255, 255, 255, 0.1);
+
+    /* Sidebar */
+    --sidebar-background: 240 15% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 250 100% 70%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 280 80% 65%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 240 15% 20%;
+    --sidebar-ring: 250 100% 70%;
+  }
+
+  .dark {
+    --background: 240 15% 6%;
+    --foreground: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(135deg, 
+      hsl(240, 20%, 8%) 0%, 
+      hsl(260, 25%, 10%) 25%,
+      hsl(280, 30%, 12%) 50%,
+      hsl(300, 25%, 10%) 75%,
+      hsl(320, 20%, 8%) 100%
+    );
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Liquid Glass - Primary Effect */
+  .liquid-glass {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.03) 50%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+  }
+
+  /* Liquid Glass Dropdown */
+  .liquid-glass-dropdown {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 15, 25, 0.98) 0%,
+      rgba(10, 10, 20, 0.99) 100%
+    );
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Glass Input States */
+  .glass-input {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-input-focused {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 
+      0 0 0 4px rgba(139, 92, 246, 0.15),
+      0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Glass Button */
+  .glass-button {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+
+  /* Glass Card Hover Effect */
+  .glass-card-hover {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card-hover:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-card-selected {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Gradient Backgrounds by Context */
+  .attune-gradient-calm {
+    background: radial-gradient(ellipse at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 100% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, hsl(240, 20%, 8%) 0%, hsl(280, 25%, 10%) 100%);
+  }
+
+  .attune-gradient-work {
+    background: radial-gradient(ellipse at 30% 0%, rgba(99, 102, 241, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 100% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, hsl(240, 25%, 8%) 0%, hsl(250, 30%, 12%) 100%);
+  }
+
+  .attune-gradient-family {
+    background: radial-gradient(ellipse at 50% 0%, rgba(244, 114, 182, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 0% 100%, rgba(251, 113, 133, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, hsl(320, 20%, 8%) 0%, hsl(340, 25%, 10%) 100%);
+  }
+
+  .attune-gradient-friends {
+    background: radial-gradient(ellipse at 70% 0%, rgba(52, 211, 153, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 0% 80%, rgba(20, 184, 166, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, hsl(160, 20%, 8%) 0%, hsl(170, 25%, 10%) 100%);
+  }
+
+  /* Primary CTA Button */
+  .btn-liquid-primary {
+    background: linear-gradient(135deg, 
+      hsl(var(--primary)) 0%, 
+      hsl(280, 80%, 60%) 100%
+    );
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 
+      0 8px 24px rgba(139, 92, 246, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-liquid-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  .btn-liquid-primary:hover::before {
+    left: 100%;
+  }
+
+  .btn-liquid-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 32px rgba(139, 92, 246, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  /* Context-specific CTA buttons */
+  .btn-context-work {
+    background: linear-gradient(135deg, 
+      hsl(var(--context-work)) 0%, 
+      hsl(260, 80%, 60%) 100%
+    );
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  }
+
+  .btn-context-work:hover {
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+  }
+
+  .btn-context-family {
+    background: linear-gradient(135deg, 
+      hsl(var(--context-family)) 0%, 
+      hsl(350, 80%, 60%) 100%
+    );
+    box-shadow: 0 8px 24px rgba(244, 114, 182, 0.4);
+  }
+
+  .btn-context-family:hover {
+    box-shadow: 0 12px 32px rgba(244, 114, 182, 0.5);
+  }
+
+  .btn-context-friends {
+    background: linear-gradient(135deg, 
+      hsl(var(--context-friends)) 0%, 
+      hsl(180, 60%, 45%) 100%
+    );
+    box-shadow: 0 8px 24px rgba(52, 211, 153, 0.4);
+  }
+
+  .btn-context-friends:hover {
+    box-shadow: 0 12px 32px rgba(52, 211, 153, 0.5);
+  }
+
+  /* Floating Orbs Animation */
+  @keyframes float-orb {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translate(20px, -20px) scale(1.1);
+      opacity: 0.5;
+    }
+  }
+
+  .floating-orb {
+    animation: float-orb 8s ease-in-out infinite;
+  }
+
+  .floating-orb-delayed {
+    animation: float-orb 10s ease-in-out infinite;
+    animation-delay: -3s;
+  }
+
+  /* Progress Dots */
+  .progress-dot {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .progress-dot-active {
+    box-shadow: 0 0 12px currentColor;
+  }
+}
+
+/* ============================================
+   6 DYNAMIC BACKGROUND THEMES
+   ============================================ */
+
+/* Theme 1: Warm Earth (Light Theme) */
+.theme-warm-earth {
+  --background: 40 30% 96%;
+  --foreground: 30 10% 25%;
+  --card: 40 25% 92%;
+  --card-foreground: 30 10% 25%;
+  --primary: 25 60% 55%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 35 20% 88%;
+  --secondary-foreground: 30 10% 30%;
+  --muted: 35 15% 85%;
+  --muted-foreground: 30 10% 45%;
+  --accent: 25 50% 50%;
+  --accent-foreground: 0 0% 100%;
+  --border: 35 20% 85%;
+  --glass-bg: rgba(253, 246, 227, 0.6);
+  --glass-border: rgba(196, 132, 108, 0.2);
+  --glass-shadow: rgba(0, 0, 0, 0.1);
+  --text-primary: #3D3D3D;
+  --theme-accent: #C4846C;
+}
+
+.theme-warm-earth body,
+body.theme-warm-earth {
+  background: linear-gradient(135deg, #FDF6E3 0%, #E8DCC8 50%, #D4C4B0 100%);
+  background-attachment: fixed;
+}
+
+.theme-warm-earth .liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(253, 246, 227, 0.7) 0%,
+    rgba(232, 220, 200, 0.5) 50%,
+    rgba(253, 246, 227, 0.6) 100%
+  );
+  border: 1px solid rgba(196, 132, 108, 0.25);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Theme 2: Modern Dark Mode */
+.theme-dark-mode {
+  --background: 0 0% 10%;
+  --foreground: 0 0% 96%;
+  --card: 0 0% 14%;
+  --card-foreground: 0 0% 96%;
+  --primary: 25 60% 55%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 22%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 25 50% 50%;
+  --accent-foreground: 0 0% 100%;
+  --border: 0 0% 20%;
+  --glass-bg: rgba(45, 45, 45, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.4);
+  --text-primary: #F5F5F5;
+  --theme-accent: #C4846C;
+}
+
+.theme-dark-mode body,
+body.theme-dark-mode {
+  background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 50%, #1F1F1F 100%);
+  background-attachment: fixed;
+}
+
+.theme-dark-mode .liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(60, 60, 60, 0.6) 0%,
+    rgba(45, 45, 45, 0.4) 50%,
+    rgba(55, 55, 55, 0.5) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Theme 3: Dark Purple Hues */
+.theme-dark-purple {
+  --background: 260 30% 8%;
+  --foreground: 270 20% 95%;
+  --card: 260 25% 12%;
+  --card-foreground: 270 20% 95%;
+  --primary: 270 60% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 260 20% 16%;
+  --secondary-foreground: 270 15% 85%;
+  --muted: 260 15% 20%;
+  --muted-foreground: 270 10% 55%;
+  --accent: 280 50% 55%;
+  --accent-foreground: 0 0% 100%;
+  --border: 260 20% 18%;
+  --glass-bg: rgba(45, 38, 64, 0.7);
+  --glass-border: rgba(155, 123, 184, 0.2);
+  --glass-shadow: rgba(0, 0, 0, 0.4);
+  --text-primary: #F0EDF5;
+  --theme-accent: #9B7BB8;
+}
+
+.theme-dark-purple body,
+body.theme-dark-purple {
+  background: linear-gradient(135deg, #1A1625 0%, #2D2640 50%, #1F1A2E 100%);
+  background-attachment: fixed;
+}
+
+.theme-dark-purple .liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(65, 55, 90, 0.6) 0%,
+    rgba(45, 38, 64, 0.4) 50%,
+    rgba(60, 50, 85, 0.5) 100%
+  );
+  border: 1px solid rgba(155, 123, 184, 0.25);
+}
+
+/* Theme 4: Ocean Depth */
+.theme-ocean-depth {
+  --background: 185 70% 15%;
+  --foreground: 180 30% 95%;
+  --card: 200 50% 18%;
+  --card-foreground: 180 30% 95%;
+  --primary: 180 80% 50%;
+  --primary-foreground: 260 100% 15%;
+  --secondary: 220 40% 20%;
+  --secondary-foreground: 180 25% 85%;
+  --muted: 240 30% 25%;
+  --muted-foreground: 180 20% 60%;
+  --accent: 180 70% 45%;
+  --accent-foreground: 0 0% 100%;
+  --border: 200 40% 22%;
+  --glass-bg: rgba(48, 207, 208, 0.15);
+  --glass-border: rgba(48, 207, 208, 0.3);
+  --glass-shadow: rgba(51, 8, 103, 0.3);
+  --text-primary: #FFFFFF;
+  --theme-accent: #30CFD0;
+}
+
+.theme-ocean-depth body,
+body.theme-ocean-depth {
+  background: linear-gradient(135deg, #30CFD0 0%, #1A6B7C 40%, #330867 100%);
+  background-attachment: fixed;
+}
+
+.theme-ocean-depth .liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(48, 207, 208, 0.2) 0%,
+    rgba(26, 107, 124, 0.25) 50%,
+    rgba(51, 8, 103, 0.3) 100%
+  );
+  border: 1px solid rgba(48, 207, 208, 0.35);
+  box-shadow:
+    0 8px 32px rgba(51, 8, 103, 0.3),
+    inset 0 1px 0 rgba(48, 207, 208, 0.3);
+}
+
+/* Theme 5: Serene Nature (Static Image Background) */
+.theme-serene-nature {
+  --background: 200 30% 95%;
+  --foreground: 210 25% 25%;
+  --card: 200 25% 92%;
+  --card-foreground: 210 25% 25%;
+  --primary: 150 50% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 180 20% 88%;
+  --secondary-foreground: 210 20% 30%;
+  --muted: 180 15% 85%;
+  --muted-foreground: 210 15% 45%;
+  --accent: 160 45% 40%;
+  --accent-foreground: 0 0% 100%;
+  --border: 180 20% 82%;
+  --glass-bg: rgba(240, 245, 250, 0.65);
+  --glass-border: rgba(100, 150, 180, 0.2);
+  --glass-shadow: rgba(0, 0, 0, 0.1);
+  --text-primary: #2D3748;
+  --theme-accent: #4A9079;
+}
+
+.theme-serene-nature body,
+body.theme-serene-nature {
+  background-image: url('/backgrounds/serene-nature.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-color: #87CEEB; /* Fallback color */
+}
+
+.theme-serene-nature .liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(240, 245, 250, 0.75) 0%,
+    rgba(220, 235, 245, 0.6) 50%,
+    rgba(240, 245, 250, 0.7) 100%
+  );
+  border: 1px solid rgba(100, 150, 180, 0.3);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Theme 6: Calming Video (Video Background Support) */
+.theme-calming-video {
+  --background: 220 25% 12%;
+  --foreground: 210 20% 95%;
+  --card: 220 20% 15%;
+  --card-foreground: 210 20% 95%;
+  --primary: 200 70% 55%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 15% 20%;
+  --secondary-foreground: 210 15% 85%;
+  --muted: 220 10% 25%;
+  --muted-foreground: 210 10% 55%;
+  --accent: 190 60% 50%;
+  --accent-foreground: 0 0% 100%;
+  --border: 220 15% 22%;
+  --glass-bg: rgba(30, 40, 60, 0.75);
+  --glass-border: rgba(100, 180, 220, 0.25);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
+  --text-primary: #E8F0F8;
+  --theme-accent: #5BA4D0;
+}
+
+.theme-calming-video body,
+body.theme-calming-video {
+  background: linear-gradient(135deg, #1E2A3A 0%, #2A3A4A 50%, #1A2530 100%);
+  background-attachment: fixed;
+}
+
+.theme-calming-video .liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(50, 70, 100, 0.65) 0%,
+    rgba(30, 42, 58, 0.5) 50%,
+    rgba(45, 65, 95, 0.6) 100%
+  );
+  border: 1px solid rgba(100, 180, 220, 0.3);
+}
+
+/* Video background container for Theme 6 */
+.video-background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.video-background-container video {
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+}
+
+.video-background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 30, 45, 0.4);
+}
+
+/* ============================================
+   EMOTION GLOW - LEFT/RIGHT ORGANIC SHAPE
+   ============================================ */
+
+/* Base emotion glow widget - wrapper approach */
+.emotion-glow-widget {
+  position: relative;
+}
+
+/* Override liquid-glass overflow for glow widgets */
+.emotion-glow-widget.liquid-glass {
+  overflow: visible !important;
+}
+
+/* Left glow using box-shadow approach for better compatibility */
+.emotion-glow-widget.liquid-glass::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 10%;
+  bottom: 10%;
+  width: 60px;
+  background: var(--emotion-color, rgba(139, 92, 246, 0.6));
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(30px);
+  opacity: 0.8;
+  transition: all 0.5s ease-out;
+}
+
+/* Right glow */
+.emotion-glow-widget.liquid-glass::after {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: 10%;
+  bottom: 10%;
+  width: 60px;
+  background: var(--emotion-color, rgba(139, 92, 246, 0.6));
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(30px);
+  opacity: 0.8;
+  transition: all 0.5s ease-out;
+}
+
+/* Emotion color presets - more vibrant for end-to-end glow */
+.emotion-glow-calm {
+  --emotion-color: rgba(56, 189, 189, 0.75);
+  --emotion-color-medium: rgba(56, 189, 189, 0.45);
+  --emotion-color-light: rgba(56, 189, 189, 0.2);
+}
+
+.emotion-glow-anxious {
+  --emotion-color: rgba(167, 139, 250, 0.75);
+  --emotion-color-medium: rgba(167, 139, 250, 0.45);
+  --emotion-color-light: rgba(167, 139, 250, 0.2);
+}
+
+.emotion-glow-frustrated {
+  --emotion-color: rgba(251, 146, 60, 0.75);
+  --emotion-color-medium: rgba(251, 146, 60, 0.45);
+  --emotion-color-light: rgba(251, 146, 60, 0.2);
+}
+
+.emotion-glow-hopeful {
+  --emotion-color: rgba(250, 204, 21, 0.75);
+  --emotion-color-medium: rgba(250, 204, 21, 0.45);
+  --emotion-color-light: rgba(250, 204, 21, 0.2);
+}
+
+.emotion-glow-tired {
+  --emotion-color: rgba(148, 163, 184, 0.75);
+  --emotion-color-medium: rgba(148, 163, 184, 0.45);
+  --emotion-color-light: rgba(148, 163, 184, 0.2);
+}
+
+.emotion-glow-motivated {
+  --emotion-color: rgba(74, 222, 128, 0.75);
+  --emotion-color-medium: rgba(74, 222, 128, 0.45);
+  --emotion-color-light: rgba(74, 222, 128, 0.2);
+}
+
+.emotion-glow-uncertain {
+  --emotion-color: rgba(96, 165, 250, 0.75);
+  --emotion-color-medium: rgba(96, 165, 250, 0.45);
+  --emotion-color-light: rgba(96, 165, 250, 0.2);
+}
+
+.emotion-glow-confident {
+  --emotion-color: rgba(244, 114, 182, 0.75);
+  --emotion-color-medium: rgba(244, 114, 182, 0.45);
+  --emotion-color-light: rgba(244, 114, 182, 0.2);
+}
+
+/* Neutral glow for cycling/unselected state */
+.emotion-glow-neutral {
+  --emotion-color: rgba(148, 163, 184, 0.4);
+  --emotion-color-medium: rgba(148, 163, 184, 0.2);
+  --emotion-color-light: rgba(148, 163, 184, 0.1);
+}
+
+/* ============================================
+   TEXT CONTRAST FOR LIGHT/DARK THEMES
+   ============================================ */
+
+/* Light themes - darker text */
+.theme-warm-earth,
+.theme-serene-nature {
+  --foreground: 30 10% 20%;
+  --muted-foreground: 30 10% 40%;
+}
+
+.theme-warm-earth .text-foreground\/90,
+.theme-warm-earth .text-foreground\/80,
+.theme-serene-nature .text-foreground\/90,
+.theme-serene-nature .text-foreground\/80 {
+  color: rgba(45, 45, 45, 0.95) !important;
+}
+
+.theme-warm-earth .text-foreground\/60,
+.theme-warm-earth .text-foreground\/50,
+.theme-warm-earth .text-muted-foreground\/70,
+.theme-serene-nature .text-foreground\/60,
+.theme-serene-nature .text-foreground\/50,
+.theme-serene-nature .text-muted-foreground\/70 {
+  color: rgba(60, 60, 60, 0.7) !important;
+}
+
+.theme-warm-earth .text-foreground\/40,
+.theme-warm-earth .text-foreground\/30,
+.theme-serene-nature .text-foreground\/40,
+.theme-serene-nature .text-foreground\/30 {
+  color: rgba(80, 80, 80, 0.6) !important;
+}
+
+/* Light theme glass buttons */
+.theme-warm-earth .glass-button,
+.theme-serene-nature .glass-button {
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(45, 45, 45, 0.8);
+}
+
+.theme-warm-earth .glass-button:hover,
+.theme-serene-nature .glass-button:hover {
+  background: rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Light theme input styling */
+.theme-warm-earth .glass-input,
+.theme-serene-nature .glass-input {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.theme-warm-earth .glass-input::placeholder,
+.theme-serene-nature .glass-input::placeholder {
+  color: rgba(60, 60, 60, 0.5);
+}
+
+/* Light theme progress dots */
+.theme-warm-earth .progress-dot:not(.progress-dot-active),
+.theme-serene-nature .progress-dot:not(.progress-dot-active) {
+  background: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Light theme scrollbar */
+.theme-warm-earth ::-webkit-scrollbar-thumb,
+.theme-serene-nature ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.theme-warm-earth ::-webkit-scrollbar-thumb:hover,
+.theme-serene-nature ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
