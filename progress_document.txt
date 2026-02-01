@@ -209,7 +209,7 @@ Feature 2.1: Add Person (Smart Progressive)
 --------------------------------------------------------------------------------
 Completed: January 31, 2026
 Developer: Claude Code + User
-Commit: (pending)
+Commit: a8888c9
 
 Tasks Completed:
 - AddPersonModal component with smart progressive fields
