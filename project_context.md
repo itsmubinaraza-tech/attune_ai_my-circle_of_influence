@@ -73,6 +73,18 @@
 - Group selection with subgroups
 - **Commit:** `a8888c9`
 
+#### Feature 2.2: Person Profile View (COMPLETE)
+- PersonProfileModal component with view/edit modes
+- Display all person details (name, group, subgroup, role, email, phone, notes)
+- Relationship health indicator with progress bar
+- Last contact date display
+- Inline editing for all fields
+- Group/subgroup selection in edit mode
+- Archive and delete functionality with confirmation
+- Double-click to open profile from relationship map
+- 17 tests added
+- **Commit:** (pending)
+
 ### Phase 4: Visual Polish (COMPLETE)
 
 #### Feature 4.1: Mood Widget
@@ -110,6 +122,7 @@
 - `src/services/people.ts` - CRUD operations
 - `src/hooks/usePeople.ts` - React Query hooks
 - `src/components/attune/AddPersonModal.tsx` - Add person form
+- `src/components/attune/PersonProfileModal.tsx` - View/edit person profile
 
 ### UI Components
 - `src/components/attune/MoodSelector.tsx` - Mood widget
@@ -118,11 +131,12 @@
 - `src/components/attune/ThemeSelector.tsx` - Theme picker
 
 ### Tests
-- `src/test/design-system.test.tsx` - 21 tests
+- `src/test/design-system.test.tsx` - 20 tests
 - `src/test/supabase.test.ts` - 18 tests
 - `src/test/auth.test.tsx` - 24 tests
 - `src/test/people.test.tsx` - 20 tests
-- **Total: 83 tests passing**
+- `src/test/person-profile.test.tsx` - 17 tests
+- **Total: 100 tests passing**
 
 ---
 
@@ -163,7 +177,7 @@ a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
 ## Remaining Features
 
 ### Phase 2: People Management
-- [ ] Feature 2.2: Person Profile View
+- [x] Feature 2.2: Person Profile View
 - [ ] Feature 2.3: Circle Dashboard (People List)
 - [ ] Feature 2.4: Connection Web (Person-to-Person Links)
 

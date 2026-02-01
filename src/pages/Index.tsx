@@ -5,9 +5,13 @@ import MoodSelector from "@/components/attune/MoodSelector";
 import PersonSearch from "@/components/attune/PersonSearch";
 import OutcomeSelector from "@/components/attune/OutcomeSelector";
 import ThemeSelector, { type ThemeName } from "@/components/attune/ThemeSelector";
+import AddPersonModal from "@/components/attune/AddPersonModal";
+import PersonProfileModal from "@/components/attune/PersonProfileModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePeople, usePeopleNeedingAttention } from "@/hooks/usePeople";
 import { ArrowRight, Sparkles, Clock, AlertCircle, MessageSquare, Menu, X, UserPlus, Briefcase, Heart, Users, Phone, MessageCircle, Copy, Check, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import type { Person as DbPerson } from "@/types/database";
 
 export type Mood = "calm" | "anxious" | "frustrated" | "hopeful" | "tired" | "motivated" | "uncertain" | "confident";
 export type ContextType = "work" | "family" | "friends" | null;
@@ -48,11 +52,11 @@ const mockPeople: Person[] = [
   { id: "21", name: "Ryan Chen", group: "friends", subgroup: "College" },
 ];
 
-// Mock data for dashboard widgets
-const needsAttention = [
-  { id: "1", name: "Mom", daysAgo: 14, group: "family" as const, phone: "+1234567890" },
-  { id: "2", name: "Jake", daysAgo: 10, group: "friends" as const, phone: "+1987654321" },
-  { id: "3", name: "Emily Wong", daysAgo: 21, group: "work" as const, phone: "+1555123456" },
+// Mock data for dashboard widgets (fallback when no real data)
+const mockNeedsAttention = [
+  { id: "mock-1", name: "Mom", daysAgo: 14, group: "family" as const, phone: "+1234567890" },
+  { id: "mock-2", name: "Jake", daysAgo: 10, group: "friends" as const, phone: "+1987654321" },
+  { id: "mock-3", name: "Emily Wong", daysAgo: 21, group: "work" as const, phone: "+1555123456" },
 ];
 
 const recentConversations = [
@@ -70,6 +74,11 @@ const groupColors = {
 const Index = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
+  // Fetch real data from Supabase
+  const { data: dbPeople = [], isLoading: peopleLoading } = usePeople();
+  const { data: peopleNeedingAttention = [] } = usePeopleNeedingAttention(7);
+
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
@@ -78,12 +87,47 @@ const Index = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState<"all" | "work" | "family" | "friends">("all");
   const [showAddPersonModal, setShowAddPersonModal] = useState(false);
-  const [people, setPeople] = useState<Person[]>(mockPeople);
-  const [newPersonName, setNewPersonName] = useState("");
-  const [newPersonGroup, setNewPersonGroup] = useState<"work" | "family" | "friends">("work");
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedProfilePersonId, setSelectedProfilePersonId] = useState<string | null>(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [selectedAttentionPerson, setSelectedAttentionPerson] = useState<typeof needsAttention[0] | null>(null);
+  const [selectedAttentionPerson, setSelectedAttentionPerson] = useState<{
+    id: string;
+    name: string;
+    daysAgo: number;
+    group: "work" | "family" | "friends";
+    phone: string;
+  } | null>(null);
   const [copiedMessage, setCopiedMessage] = useState(false);
+
+  // Convert database people to display format (merge with mock data for demo)
+  const people: Person[] = [
+    ...dbPeople.map((p: DbPerson) => ({
+      id: p.id,
+      name: p.name,
+      photo: p.photo_url || undefined,
+      group: p.group as "work" | "family" | "friends",
+      subgroup: p.subgroup || undefined,
+    })),
+    // Fallback to mock data if no real data
+    ...(dbPeople.length === 0 ? mockPeople : []),
+  ];
+
+  // Convert people needing attention to display format
+  const needsAttention = peopleNeedingAttention.length > 0
+    ? peopleNeedingAttention.slice(0, 3).map((p: DbPerson) => {
+        const lastContact = p.last_contact ? new Date(p.last_contact) : null;
+        const daysAgo = lastContact
+          ? Math.ceil((Date.now() - lastContact.getTime()) / (1000 * 60 * 60 * 24))
+          : 30;
+        return {
+          id: p.id,
+          name: p.name,
+          daysAgo,
+          group: p.group as "work" | "family" | "friends",
+          phone: p.phone || "",
+        };
+      })
+    : mockNeedsAttention;
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -127,6 +171,21 @@ const Index = () => {
     setCurrentContext(person?.group || "work");
   };
 
+  // Open person profile modal
+  const handleOpenProfile = (personId: string) => {
+    // Only open profile for real database entries (not mock data)
+    if (!personId.startsWith("mock-") && !personId.startsWith("custom-") && personId.length > 10) {
+      setSelectedProfilePersonId(personId);
+      setShowProfileModal(true);
+    }
+  };
+
+  // Handle person added from AddPersonModal
+  const handlePersonAdded = () => {
+    // Data will refresh automatically via React Query
+    toast.success("Person added to your circle!");
+  };
+
   // Generate personalized reconnection message based on relationship
   const generateReconnectMessage = (person: typeof needsAttention[0]) => {
     const messages = {
@@ -164,22 +223,6 @@ const Index = () => {
     navigator.clipboard.writeText(message);
     setCopiedMessage(true);
     setTimeout(() => setCopiedMessage(false), 2000);
-  };
-
-  // Add new person to the list
-  const handleAddPerson = () => {
-    if (!newPersonName.trim()) return;
-    const newPerson: Person = {
-      id: `custom-${Date.now()}`,
-      name: newPersonName.trim(),
-      group: newPersonGroup,
-      subgroup: "Custom",
-    };
-    setPeople([...people, newPerson]);
-    setNewPersonName("");
-    setShowAddPersonModal(false);
-    // Optionally auto-select the new person
-    handlePersonSelect(newPerson);
   };
 
   // Get context-based colors for ambient effects
@@ -524,6 +567,7 @@ const Index = () => {
                           <motion.button
                             key={person.id}
                             onClick={() => handlePersonSelect(person)}
+                            onDoubleClick={() => handleOpenProfile(person.id)}
                             className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white hover:scale-110 transition-transform ${
                               selectedPerson?.id === person.id ? "ring-2 ring-white scale-110" : ""
                             }`}
@@ -558,6 +602,7 @@ const Index = () => {
                           <motion.button
                             key={person.id}
                             onClick={() => handlePersonSelect(person)}
+                            onDoubleClick={() => handleOpenProfile(person.id)}
                             className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white hover:scale-110 transition-transform ${
                               selectedPerson?.id === person.id ? "ring-2 ring-white scale-110" : ""
                             }`}
@@ -592,6 +637,7 @@ const Index = () => {
                           <motion.button
                             key={person.id}
                             onClick={() => handlePersonSelect(person)}
+                            onDoubleClick={() => handleOpenProfile(person.id)}
                             className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white hover:scale-110 transition-transform ${
                               selectedPerson?.id === person.id ? "ring-2 ring-white scale-110" : ""
                             }`}
@@ -614,7 +660,7 @@ const Index = () => {
                   </AnimatePresence>
                 </div>
               </div>
-              <p className="text-xs text-foreground/50 text-center mt-3">Tap a person to select them</p>
+              <p className="text-xs text-foreground/50 text-center mt-3">Tap to select, double-tap to view profile</p>
             </motion.section>
 
             {/* Bottom row - stack on mobile, two columns on larger screens */}
@@ -648,6 +694,9 @@ const Index = () => {
                           boxShadow: `0 2px 8px ${groupColors[person.group]}40`
                         }}
                         onClick={() => {
+                          // Open profile for real database entries
+                          handleOpenProfile(person.id);
+                          // Also select the person for the flow
                           const found = people.find(p => p.name === person.name);
                           if (found) handlePersonSelect(found);
                         }}
@@ -730,126 +779,21 @@ const Index = () => {
       </div>
 
       {/* Add Person Modal */}
-      <AnimatePresence>
-        {showAddPersonModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          >
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setShowAddPersonModal(false)}
-            />
+      <AddPersonModal
+        isOpen={showAddPersonModal}
+        onClose={() => setShowAddPersonModal(false)}
+        onPersonAdded={handlePersonAdded}
+      />
 
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative liquid-glass p-6 rounded-3xl w-full max-w-md"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-foreground/90">Add New Person</h2>
-                <button
-                  onClick={() => setShowAddPersonModal(false)}
-                  className="p-2 rounded-full hover:bg-white/10 transition-colors"
-                >
-                  <X className="w-5 h-5 text-foreground/60" />
-                </button>
-              </div>
-
-              {/* Name Input */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-foreground/70 mb-2">Name</label>
-                <input
-                  type="text"
-                  value={newPersonName}
-                  onChange={(e) => setNewPersonName(e.target.value)}
-                  placeholder="Enter their name..."
-                  className="w-full px-4 py-3 rounded-xl glass-input bg-white/5 text-foreground placeholder:text-foreground/30 outline-none focus:ring-2 focus:ring-white/20"
-                />
-              </div>
-
-              {/* Group Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-foreground/70 mb-3">Group</label>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setNewPersonGroup("work")}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
-                      newPersonGroup === "work"
-                        ? "ring-2 ring-white/30"
-                        : "hover:bg-white/5"
-                    }`}
-                    style={{
-                      background: newPersonGroup === "work" ? `${groupColors.work}30` : `${groupColors.work}10`,
-                    }}
-                  >
-                    <Briefcase className="w-4 h-4" style={{ color: groupColors.work }} />
-                    <span className="text-sm font-medium" style={{ color: groupColors.work }}>Work</span>
-                  </button>
-                  <button
-                    onClick={() => setNewPersonGroup("family")}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
-                      newPersonGroup === "family"
-                        ? "ring-2 ring-white/30"
-                        : "hover:bg-white/5"
-                    }`}
-                    style={{
-                      background: newPersonGroup === "family" ? `${groupColors.family}30` : `${groupColors.family}10`,
-                    }}
-                  >
-                    <Heart className="w-4 h-4" style={{ color: groupColors.family }} />
-                    <span className="text-sm font-medium" style={{ color: groupColors.family }}>Family</span>
-                  </button>
-                  <button
-                    onClick={() => setNewPersonGroup("friends")}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
-                      newPersonGroup === "friends"
-                        ? "ring-2 ring-white/30"
-                        : "hover:bg-white/5"
-                    }`}
-                    style={{
-                      background: newPersonGroup === "friends" ? `${groupColors.friends}30` : `${groupColors.friends}10`,
-                    }}
-                  >
-                    <Users className="w-4 h-4" style={{ color: groupColors.friends }} />
-                    <span className="text-sm font-medium" style={{ color: groupColors.friends }}>Friends</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowAddPersonModal(false)}
-                  className="flex-1 py-3 rounded-xl glass-button text-foreground/70 hover:text-foreground/90 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddPerson}
-                  disabled={!newPersonName.trim()}
-                  className={`flex-1 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
-                    newPersonName.trim()
-                      ? "bg-white/20 text-foreground hover:bg-white/30"
-                      : "bg-white/5 text-foreground/30 cursor-not-allowed"
-                  }`}
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Add Person
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Person Profile Modal */}
+      <PersonProfileModal
+        personId={selectedProfilePersonId}
+        isOpen={showProfileModal}
+        onClose={() => {
+          setShowProfileModal(false);
+          setSelectedProfilePersonId(null);
+        }}
+      />
 
       {/* Message Draft Modal */}
       <AnimatePresence>
