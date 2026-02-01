@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import MoodSelector from "@/components/attune/MoodSelector";
 import PersonSearch from "@/components/attune/PersonSearch";
 import OutcomeSelector from "@/components/attune/OutcomeSelector";
@@ -306,8 +306,8 @@ const Index = () => {
             <div className="flex items-center gap-2 sm:gap-4">
               {/* Navigation for web */}
               <nav className="hidden lg:flex items-center gap-6 mr-6">
-                <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Today</a>
-                <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Circle</a>
+                <Link to="/" className="text-sm font-medium text-foreground/90 transition-colors">Today</Link>
+                <Link to="/circle" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Circle</Link>
                 <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Reflect</a>
                 <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Me</a>
                 <button
@@ -335,8 +335,8 @@ const Index = () => {
                 className="lg:hidden mt-4 overflow-hidden"
               >
                 <div className="liquid-glass rounded-2xl p-4 space-y-2">
-                  <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Today</a>
-                  <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">My Circle</a>
+                  <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 bg-white/10 transition-colors">Today</Link>
+                  <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">My Circle</Link>
                   <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Reflect</a>
                   <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Profile</a>
                   <div className="border-t border-white/10 pt-2 mt-2">

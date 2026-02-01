@@ -85,6 +85,19 @@
 - 17 tests added
 - **Commit:** `5a15579`
 
+#### Feature 2.3: Circle Dashboard (COMPLETE)
+- Dedicated `/circle` page for viewing all people
+- Search functionality (by name, email, role)
+- Filter tabs by group (All, Work, Family, Friends, Acquaintances)
+- Sort options (Name, Last Contact, Relationship Health)
+- People cards with avatar, role, last contact, health indicator
+- Quick actions (email, call) on hover
+- Empty state with add person CTA
+- Integrated AddPersonModal and PersonProfileModal
+- Navigation links from Index page (desktop and mobile)
+- 23 tests added
+- **Commit:** (pending)
+
 ### Phase 4: Visual Polish (COMPLETE)
 
 #### Feature 4.1: Mood Widget
@@ -123,6 +136,7 @@
 - `src/hooks/usePeople.ts` - React Query hooks
 - `src/components/attune/AddPersonModal.tsx` - Add person form
 - `src/components/attune/PersonProfileModal.tsx` - View/edit person profile
+- `src/pages/Circle.tsx` - Circle Dashboard page
 
 ### UI Components
 - `src/components/attune/MoodSelector.tsx` - Mood widget
@@ -136,7 +150,8 @@
 - `src/test/auth.test.tsx` - 24 tests
 - `src/test/people.test.tsx` - 20 tests
 - `src/test/person-profile.test.tsx` - 17 tests
-- **Total: 100 tests passing**
+- `src/test/circle.test.tsx` - 23 tests
+- **Total: 123 tests passing**
 
 ---
 
@@ -178,7 +193,7 @@ a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
 
 ### Phase 2: People Management
 - [x] Feature 2.2: Person Profile View
-- [ ] Feature 2.3: Circle Dashboard (People List)
+- [x] Feature 2.3: Circle Dashboard (People List)
 - [ ] Feature 2.4: Connection Web (Person-to-Person Links)
 
 ### Phase 3: Talk to Me (Core AI Feature)
