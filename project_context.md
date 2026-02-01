@@ -83,7 +83,7 @@
 - Archive and delete functionality with confirmation
 - Double-click to open profile from relationship map
 - 17 tests added
-- **Commit:** (pending)
+- **Commit:** `5a15579`
 
 ### Phase 4: Visual Polish (COMPLETE)
 
