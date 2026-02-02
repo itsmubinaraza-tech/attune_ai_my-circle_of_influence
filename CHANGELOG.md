@@ -42,6 +42,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Start new conversation button
 - All Quick Talk conversations linked to person appear in their profile
 
+### Fixed - Mobile Layout Optimization
+- Main flow (Mood, Person, Outcome, Let's Connect, Quick Talk) now fits in mobile viewport
+- Dashboard widgets appear below the fold, accessible by scrolling
+- Reduced padding on mobile for MoodSelector, PersonSearch, OutcomeSelector components
+- Added visual separator (border) between main flow and scrollable dashboard
+- Optimized button spacing and touch targets for mobile devices
+- Tighter gaps between widgets on small screens
+
 ### Added - Phase 5: Import Integrations (Features 5.2-5.5)
 
 #### Feature 5.2: Phone Contacts Import

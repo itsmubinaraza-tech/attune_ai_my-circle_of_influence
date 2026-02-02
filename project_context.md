@@ -218,6 +218,23 @@
 - Graceful fallbacks when speech APIs unavailable
 - **Commit:** `c596457`
 
+#### Feature 7.2: Conversation History Integration
+- ConversationHistory component displays past coaching sessions per person
+- Added to PersonProfileModal under "Conversations" section
+- Shows session preview, date, and message count
+- Click to continue any previous conversation
+- Start new conversation button
+- All Quick Talk conversations linked to person appear in their profile
+- **Commit:** `62d730f`
+
+#### Feature 7.3: Mobile Layout Optimization
+- Main flow (Mood, Person, Outcome, buttons) fits in mobile viewport without scrolling
+- Dashboard widgets (Circle, Insights, etc.) appear below the fold with scroll
+- Reduced padding on mobile components (MoodSelector, PersonSearch, OutcomeSelector)
+- Visual separator between main flow and scrollable content
+- Optimized button spacing for touch targets
+- **Commit:** `3d80b93`
+
 ---
 
 ## Key Files
@@ -331,14 +348,13 @@
 ## Git Commits (Recent)
 
 ```
-ac6f685 docs: Update progress document with add person commit hash
-a8888c9 feat(people): Add Person feature with smart progressive form (Feature 2.1)
-de6d12f docs: Update progress document with auth commit hash
-7c69dd8 feat(auth): Add authentication system (Feature 1.3)
-a9d323d feat(supabase): Add Supabase backend setup (Feature 1.2)
-ffb312f docs: Update progress document with completed features
-7c52ff2 Initial commit: Attune - My Circle of Influence
-a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
+3d80b93 fix(mobile): Adjust layout so main flow fits in viewport
+62d730f feat(conversations): Add conversation history to person profile
+c596457 feat(quick-talk): Add voice-first Quick Talk feature
+9872751 feat(reminders): Add Reminders System (Feature 6.3)
+27401d6 feat(summaries): Add Smart Summaries feature (Feature 6.2)
+de0765b feat(interactions): Add Interaction Logging feature (Feature 6.1)
+9edebd9 feat(import): Add contact import for Phone, LinkedIn, Facebook, Google
 ```
 
 ---
@@ -369,6 +385,23 @@ a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
 - [x] Feature 6.1: Interaction Logging
 - [x] Feature 6.2: Smart Summaries
 - [x] Feature 6.3: Reminders System
+
+### Phase 7: Quick Talk (Voice-First) (COMPLETE)
+- [x] Feature 7.1: Quick Talk Voice Flow
+- [x] Feature 7.2: Conversation History Integration
+- [x] Feature 7.3: Mobile Layout Optimization
+
+---
+
+## Deployment
+
+### Production URL
+- **Live App:** https://attune-ai-my-circle-of-influence.vercel.app
+
+### Vercel Configuration
+- **Project:** attune-ai-my-circle-of-influence
+- **Git Repository:** https://github.com/itsmubinaraza-tech/attune_ai_my-circle_of_influence
+- **Auto-deploy:** Enabled on push to `main` branch
 
 ---
 
@@ -408,4 +441,4 @@ npm run lint
 
 ---
 
-*Last Updated: February 2, 2026*
+*Last Updated: February 3, 2026*
