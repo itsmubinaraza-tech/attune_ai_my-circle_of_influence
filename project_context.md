@@ -235,6 +235,10 @@
 - `src/components/attune/LogInteractionModal.tsx` - 3-step wizard to log interactions
 - `src/components/attune/InteractionHistory.tsx` - Display past interactions
 
+### Import
+- `src/services/import.ts` - CSV parsing, field mapping, contact import
+- `src/components/attune/ImportContactsModal.tsx` - Multi-step import wizard
+
 ### Chat / Talk to Me
 - `src/pages/Chat.tsx` - Main chat page with history sidebar
 - `src/components/attune/ChatInterface.tsx` - Chat UI with messages and input
@@ -264,7 +268,8 @@
 - `src/test/connections.test.tsx` - 23 tests
 - `src/test/chat.test.tsx` - 33 tests
 - `src/test/interactions.test.tsx` - 37 tests
-- **Total: 216 tests passing**
+- `src/test/import.test.tsx` - 37 tests
+- **Total: 253 tests passing**
 
 ---
 
@@ -317,12 +322,12 @@ a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
 - [x] Feature 3.4: Person Context Injection
 - [x] Feature 3.5: Conversation Limits & Credits
 
-### Phase 5: Import & Connections
+### Phase 5: Import & Connections (COMPLETE)
 - [x] Feature 5.1: Demo Data Seeding (28 Mockup contacts)
-- [ ] Feature 5.2: Phone Contacts Import (UI ready)
-- [ ] Feature 5.3: LinkedIn Import (UI ready)
-- [ ] Feature 5.4: Facebook Import (UI ready)
-- [ ] Feature 5.5: Google Contacts Import
+- [x] Feature 5.2: Phone Contacts Import
+- [x] Feature 5.3: LinkedIn Import
+- [x] Feature 5.4: Facebook Import
+- [x] Feature 5.5: Google Contacts Import
 
 ### Phase 6: Intelligence & Growth
 - [x] Feature 6.1: Interaction Logging

@@ -8,6 +8,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added - Phase 5: Import Integrations (Features 5.2-5.5)
+
+#### Feature 5.2: Phone Contacts Import
+- Contact Picker API integration for mobile devices
+- CSV upload fallback for desktop
+- Instructions for exporting phone contacts
+
+#### Feature 5.3: LinkedIn Import
+- LinkedIn connections CSV file import
+- Step-by-step instructions for exporting from LinkedIn
+- Field mapping for First Name, Last Name, Email, Company, Position
+
+#### Feature 5.4: Facebook Import
+- Facebook friends import via data export
+- Instructions for downloading Facebook data
+- JSON and CSV format support
+
+#### Feature 5.5: Google Contacts Import
+- Google Contacts CSV file import
+- Step-by-step instructions for exporting from Google
+- Field mapping for Name, Email, Phone, Organization, Title
+
+#### Import Infrastructure
+- Import service (`src/services/import.ts`) with CSV parsing
+- ImportContactsModal component with multi-step wizard:
+  - Step 1: Platform-specific instructions
+  - Step 2: File upload with drag & drop
+  - Step 3: Contact preview and selection
+  - Step 4: Import progress
+  - Step 5: Results summary
+- Automatic group assignment based on source:
+  - LinkedIn → Work
+  - Facebook → Friends
+  - With company → Work
+  - Generic → Acquaintances
+- VCard export generation
+- 37 tests for import feature
+- **Total tests: 253 passing**
+
 ### Added - Feature 6.1: Interaction Logging
 - Interactions service (`src/services/interactions.ts`) with full CRUD operations
 - React Query hooks (`src/hooks/useInteractions.ts`) for data fetching
@@ -222,4 +261,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 | connections.test.tsx | 23 |
 | chat.test.tsx | 33 |
 | interactions.test.tsx | 37 |
-| **Total** | **216** |
+| import.test.tsx | 37 |
+| **Total** | **253** |

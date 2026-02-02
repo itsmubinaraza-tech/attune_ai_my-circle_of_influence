@@ -29,7 +29,9 @@ import { useConnections } from '@/hooks/useConnections';
 import AddPersonModal from '@/components/attune/AddPersonModal';
 import PersonProfileModal from '@/components/attune/PersonProfileModal';
 import AddConnectionModal from '@/components/attune/AddConnectionModal';
+import ImportContactsModal from '@/components/attune/ImportContactsModal';
 import type { Person, GroupType } from '@/types/database';
+import type { ImportSource } from '@/services/import';
 
 type SortOption = 'name' | 'last_contact' | 'relationship_health';
 type FilterGroup = 'all' | GroupType;
@@ -60,7 +62,15 @@ export default function Circle() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddConnectionModal, setShowAddConnectionModal] = useState(false);
   const [showImportMenu, setShowImportMenu] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importSource, setImportSource] = useState<ImportSource>('csv');
   const importMenuRef = useRef<HTMLDivElement>(null);
+
+  const openImportModal = (source: ImportSource) => {
+    setImportSource(source);
+    setShowImportModal(true);
+    setShowImportMenu(false);
+  };
 
   // Close import menu when clicking outside
   useEffect(() => {
@@ -247,11 +257,7 @@ export default function Circle() {
                         <div className="my-2 border-t border-white/10" />
 
                         <button
-                          onClick={() => {
-                            // TODO: Implement phone contacts import
-                            alert('Phone contacts import coming soon!');
-                            setShowImportMenu(false);
-                          }}
+                          onClick={() => openImportModal('phone')}
                           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left"
                         >
                           <Smartphone className="w-5 h-5 text-green-400" />
@@ -262,11 +268,7 @@ export default function Circle() {
                         </button>
 
                         <button
-                          onClick={() => {
-                            // TODO: Implement LinkedIn import
-                            alert('LinkedIn import coming soon!');
-                            setShowImportMenu(false);
-                          }}
+                          onClick={() => openImportModal('linkedin')}
                           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left"
                         >
                           <Linkedin className="w-5 h-5 text-blue-400" />
@@ -277,17 +279,24 @@ export default function Circle() {
                         </button>
 
                         <button
-                          onClick={() => {
-                            // TODO: Implement Facebook import
-                            alert('Facebook import coming soon!');
-                            setShowImportMenu(false);
-                          }}
+                          onClick={() => openImportModal('facebook')}
                           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left"
                         >
                           <Facebook className="w-5 h-5 text-blue-500" />
                           <div>
                             <p className="text-sm font-medium text-foreground/90">Facebook</p>
                             <p className="text-xs text-foreground/50">Import friends</p>
+                          </div>
+                        </button>
+
+                        <button
+                          onClick={() => openImportModal('google')}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left"
+                        >
+                          <Mail className="w-5 h-5 text-red-400" />
+                          <div>
+                            <p className="text-sm font-medium text-foreground/90">Google Contacts</p>
+                            <p className="text-xs text-foreground/50">Import from Gmail</p>
                           </div>
                         </button>
                       </div>
@@ -465,25 +474,32 @@ export default function Circle() {
                       Demo Data
                     </button>
                     <button
-                      onClick={() => alert('Phone contacts import coming soon!')}
+                      onClick={() => openImportModal('phone')}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-foreground/70 transition-all"
                     >
                       <Smartphone className="w-4 h-4 text-green-400" />
                       Phone
                     </button>
                     <button
-                      onClick={() => alert('LinkedIn import coming soon!')}
+                      onClick={() => openImportModal('linkedin')}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-foreground/70 transition-all"
                     >
                       <Linkedin className="w-4 h-4 text-blue-400" />
                       LinkedIn
                     </button>
                     <button
-                      onClick={() => alert('Facebook import coming soon!')}
+                      onClick={() => openImportModal('facebook')}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-foreground/70 transition-all"
                     >
                       <Facebook className="w-4 h-4 text-blue-500" />
                       Facebook
+                    </button>
+                    <button
+                      onClick={() => openImportModal('google')}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-foreground/70 transition-all"
+                    >
+                      <Mail className="w-4 h-4 text-red-400" />
+                      Google
                     </button>
                   </div>
                 </div>
@@ -618,6 +634,13 @@ export default function Circle() {
       <AddConnectionModal
         isOpen={showAddConnectionModal}
         onClose={() => setShowAddConnectionModal(false)}
+      />
+
+      {/* Import Contacts Modal */}
+      <ImportContactsModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        source={importSource}
       />
     </div>
   );
