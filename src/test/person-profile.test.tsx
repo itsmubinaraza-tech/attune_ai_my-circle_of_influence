@@ -3,6 +3,42 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PersonProfileModal from '@/components/attune/PersonProfileModal';
 
+// Mock useSummaries hooks
+vi.mock('@/hooks/useSummaries', () => ({
+  useRelationshipSummary: vi.fn().mockReturnValue({
+    data: {
+      personId: 'test-id-123',
+      personName: 'John Doe',
+      group: 'work',
+      healthScore: 75,
+      healthTrend: 'stable',
+      lastContact: new Date().toISOString(),
+      daysSinceContact: 0,
+      totalInteractions: 5,
+      recentInteractions: 2,
+      successRate: 80,
+      topInteractionType: 'call',
+      moodPattern: null,
+      strengths: ['High success rate'],
+      areasToImprove: [],
+      suggestedActions: ['Schedule next meeting'],
+    },
+    isLoading: false,
+    error: null,
+  }),
+  useAISummary: vi.fn().mockReturnValue({
+    data: null,
+    isLoading: false,
+    error: null,
+  }),
+  summaryKeys: {
+    all: ['summaries'],
+    relationship: (personId: string) => ['summaries', 'relationship', personId],
+    circle: () => ['summaries', 'circle'],
+    ai: (personId: string) => ['summaries', 'ai', personId],
+  },
+}));
+
 // Mock Supabase
 vi.mock('@/lib/supabase', () => ({
   supabase: {

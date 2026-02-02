@@ -235,6 +235,12 @@
 - `src/components/attune/LogInteractionModal.tsx` - 3-step wizard to log interactions
 - `src/components/attune/InteractionHistory.tsx` - Display past interactions
 
+### Summaries
+- `src/services/summaries.ts` - Relationship and circle insights, AI summary generation
+- `src/hooks/useSummaries.ts` - React Query hooks for summaries
+- `src/components/attune/RelationshipSummaryCard.tsx` - Individual relationship insights display
+- `src/components/attune/CircleInsightsWidget.tsx` - Overall circle analytics widget
+
 ### Import
 - `src/services/import.ts` - CSV parsing, field mapping, contact import
 - `src/components/attune/ImportContactsModal.tsx` - Multi-step import wizard
@@ -269,7 +275,8 @@
 - `src/test/chat.test.tsx` - 33 tests
 - `src/test/interactions.test.tsx` - 37 tests
 - `src/test/import.test.tsx` - 37 tests
-- **Total: 253 tests passing**
+- `src/test/summaries.test.tsx` - 25 tests
+- **Total: 278 tests passing**
 
 ---
 
@@ -329,9 +336,9 @@ a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
 - [x] Feature 5.4: Facebook Import
 - [x] Feature 5.5: Google Contacts Import
 
-### Phase 6: Intelligence & Growth
+### Phase 6: Intelligence & Growth (IN PROGRESS)
 - [x] Feature 6.1: Interaction Logging
-- [ ] Feature 6.2: Smart Summaries
+- [x] Feature 6.2: Smart Summaries
 - [ ] Feature 6.3: Reminders System
 
 ---
@@ -372,4 +379,4 @@ npm run lint
 
 ---
 
-*Last Updated: February 1, 2026*
+*Last Updated: February 2, 2026*

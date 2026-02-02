@@ -29,6 +29,7 @@ import { getConnectionTypeLabel } from '@/services/connections';
 import AddConnectionModal from './AddConnectionModal';
 import LogInteractionModal from './LogInteractionModal';
 import InteractionHistory from './InteractionHistory';
+import { RelationshipSummaryCard } from './RelationshipSummaryCard';
 import type { GroupType, Person } from '@/types/database';
 
 interface PersonProfileModalProps {
@@ -329,24 +330,13 @@ export default function PersonProfileModal({
                 </div>
               </div>
 
-              {/* Relationship Health */}
-              <div className="mb-6 p-4 rounded-xl bg-white/5">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-foreground/70">Relationship Health</span>
-                  <span className="text-sm text-foreground/50">
-                    {person.relationship_health !== null ? `${person.relationship_health}%` : 'Not set'}
-                  </span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${getHealthColor(person.relationship_health)}`}
-                    style={{ width: `${person.relationship_health || 0}%` }}
-                  />
-                </div>
-                <div className="flex items-center gap-2 mt-3 text-xs text-foreground/50">
-                  <Calendar className="w-3 h-3" />
-                  <span>Last contact: {formatDate(person.last_contact)}</span>
-                </div>
+              {/* Relationship Insights */}
+              <div className="mb-6">
+                <RelationshipSummaryCard
+                  personId={person.id}
+                  personName={person.name}
+                  compact={false}
+                />
               </div>
 
               {/* Group Selection (Edit Mode) */}

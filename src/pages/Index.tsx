@@ -8,6 +8,7 @@ import ThemeSelector, { type ThemeName } from "@/components/attune/ThemeSelector
 import AddPersonModal from "@/components/attune/AddPersonModal";
 import PersonProfileModal from "@/components/attune/PersonProfileModal";
 import RelationshipGraph from "@/components/attune/RelationshipGraph";
+import { CircleInsightsWidget } from "@/components/attune/CircleInsightsWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePeopleWithAutoSeed, usePeopleNeedingAttention } from "@/hooks/usePeople";
 import { useConnections } from "@/hooks/useConnections";
@@ -480,6 +481,15 @@ const Index = () => {
                 }}
                 onPersonDoubleClick={(person) => handleOpenProfile(person.id)}
               />
+            </motion.section>
+
+            {/* Circle Insights */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.45 }}
+            >
+              <CircleInsightsWidget compact />
             </motion.section>
 
             {/* Bottom row - stack on mobile, two columns on larger screens */}

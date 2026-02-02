@@ -45,9 +45,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Generic → Acquaintances
 - VCard export generation
 - 37 tests for import feature
-- **Total tests: 253 passing**
+- **Total tests: 278 passing**
 
-### Added - Feature 6.1: Interaction Logging
+### Added - Phase 6: Intelligence & Growth
+
+#### Feature 6.1: Interaction Logging
 - Interactions service (`src/services/interactions.ts`) with full CRUD operations
 - React Query hooks (`src/hooks/useInteractions.ts`) for data fetching
 - LogInteractionModal component with 3-step wizard:
@@ -63,7 +65,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - PersonProfileModal updated with Interactions section and "Log Interaction" button
 - Database trigger auto-updates last_contact when interaction is logged
 - 37 tests for interactions feature
-- **Total tests: 216 passing**
+
+#### Feature 6.2: Smart Summaries
+- Summaries service (`src/services/summaries.ts`) with relationship analysis:
+  - `getRelationshipSummary()` - Individual relationship insights
+  - `getCircleInsights()` - Overall circle analytics
+  - `generateAISummary()` - AI-powered relationship summaries via Claude
+- React Query hooks (`src/hooks/useSummaries.ts`) for data fetching:
+  - `useRelationshipSummary()` - Get summary for a person
+  - `useCircleInsights()` - Get circle-wide insights
+  - `useAISummary()` - Get AI-generated summary
+- RelationshipSummaryCard component:
+  - Health score with trend indicator (improving/stable/declining)
+  - Stats grid (days since contact, total interactions, success rate)
+  - Mood pattern analysis
+  - Strengths and areas to improve badges
+  - Suggested actions list
+  - AI-powered insights button (uses Claude via edge function)
+  - Compact mode for inline display
+- CircleInsightsWidget component:
+  - Overview stats (total people, interactions, average health)
+  - Health distribution bar (healthy/moderate/needs attention)
+  - Group breakdown visualization
+  - Most connected people list
+  - People needing attention list
+  - Weekly activity chart
+  - Weekly trend indicator
+  - Compact mode for dashboard
+- PersonProfileModal now shows RelationshipSummaryCard instead of basic health bar
+- Index page now shows CircleInsightsWidget in the dashboard
+- 25 tests for summaries feature
+- **Total tests: 278 passing**
 
 ### Fixed - UI/UX Improvements
 - PersonSearch component now shows selected person as a chip inside the search box (not in a separate box below)
@@ -262,4 +294,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 | chat.test.tsx | 33 |
 | interactions.test.tsx | 37 |
 | import.test.tsx | 37 |
-| **Total** | **253** |
+| summaries.test.tsx | 25 |
+| **Total** | **278** |
