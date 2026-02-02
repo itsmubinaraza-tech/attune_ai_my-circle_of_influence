@@ -247,32 +247,50 @@ export type Database = {
         Row: {
           id: string
           created_at: string
+          updated_at: string
           user_id: string
           person_id: string
-          reminder_date: string
+          title: string
           message: string | null
-          is_completed: boolean
-          reminder_type: 'user_set' | 'smart_nudge'
+          reminder_type: 'one_time' | 'recurring' | 'smart_nudge'
+          scheduled_for: string
+          frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | null
+          status: 'pending' | 'completed' | 'snoozed' | 'dismissed'
+          completed_at: string | null
+          snoozed_until: string | null
+          is_smart_nudge: boolean
         }
         Insert: {
           id?: string
           created_at?: string
+          updated_at?: string
           user_id: string
           person_id: string
-          reminder_date: string
+          title: string
           message?: string | null
-          is_completed?: boolean
-          reminder_type: 'user_set' | 'smart_nudge'
+          reminder_type: 'one_time' | 'recurring' | 'smart_nudge'
+          scheduled_for: string
+          frequency?: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | null
+          status?: 'pending' | 'completed' | 'snoozed' | 'dismissed'
+          completed_at?: string | null
+          snoozed_until?: string | null
+          is_smart_nudge?: boolean
         }
         Update: {
           id?: string
           created_at?: string
+          updated_at?: string
           user_id?: string
           person_id?: string
-          reminder_date?: string
+          title?: string
           message?: string | null
-          is_completed?: boolean
-          reminder_type?: 'user_set' | 'smart_nudge'
+          reminder_type?: 'one_time' | 'recurring' | 'smart_nudge'
+          scheduled_for?: string
+          frequency?: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | null
+          status?: 'pending' | 'completed' | 'snoozed' | 'dismissed'
+          completed_at?: string | null
+          snoozed_until?: string | null
+          is_smart_nudge?: boolean
         }
       }
     }
@@ -286,7 +304,9 @@ export type Database = {
       group_type: 'work' | 'family' | 'friends' | 'acquaintances'
       connection_type: 'knows' | 'works_with' | 'related_to'
       interaction_outcome: 'successful' | 'partial' | 'unsuccessful'
-      reminder_type: 'user_set' | 'smart_nudge'
+      reminder_type: 'one_time' | 'recurring' | 'smart_nudge'
+      reminder_status: 'pending' | 'completed' | 'snoozed' | 'dismissed'
+      reminder_frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly'
     }
   }
 }
@@ -301,8 +321,14 @@ export type Interaction = Database['public']['Tables']['interactions']['Row']
 export type CoachingSession = Database['public']['Tables']['coaching_sessions']['Row']
 export type UserCredits = Database['public']['Tables']['user_credits']['Row']
 export type Reminder = Database['public']['Tables']['reminders']['Row']
+export type ReminderInsert = Database['public']['Tables']['reminders']['Insert']
+export type ReminderUpdate = Database['public']['Tables']['reminders']['Update']
+export type InteractionInsert = Database['public']['Tables']['interactions']['Insert']
+export type InteractionUpdate = Database['public']['Tables']['interactions']['Update']
 
 export type GroupType = 'work' | 'family' | 'friends' | 'acquaintances'
 export type ConnectionType = 'knows' | 'works_with' | 'related_to'
 export type InteractionOutcome = 'successful' | 'partial' | 'unsuccessful'
-export type ReminderType = 'user_set' | 'smart_nudge'
+export type ReminderTypeEnum = 'one_time' | 'recurring' | 'smart_nudge'
+export type ReminderStatus = 'pending' | 'completed' | 'snoozed' | 'dismissed'
+export type ReminderFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly'

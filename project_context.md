@@ -241,6 +241,12 @@
 - `src/components/attune/RelationshipSummaryCard.tsx` - Individual relationship insights display
 - `src/components/attune/CircleInsightsWidget.tsx` - Overall circle analytics widget
 
+### Reminders
+- `src/services/reminders.ts` - Reminder CRUD, smart nudges, recurring logic
+- `src/hooks/useReminders.ts` - React Query hooks for reminders
+- `src/components/attune/CreateReminderModal.tsx` - Create reminder form
+- `src/components/attune/RemindersWidget.tsx` - Reminders display widget
+
 ### Import
 - `src/services/import.ts` - CSV parsing, field mapping, contact import
 - `src/components/attune/ImportContactsModal.tsx` - Multi-step import wizard
@@ -276,7 +282,8 @@
 - `src/test/interactions.test.tsx` - 37 tests
 - `src/test/import.test.tsx` - 37 tests
 - `src/test/summaries.test.tsx` - 25 tests
-- **Total: 278 tests passing**
+- `src/test/reminders.test.tsx` - 30 tests
+- **Total: 308 tests passing**
 
 ---
 
@@ -336,10 +343,10 @@ a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
 - [x] Feature 5.4: Facebook Import
 - [x] Feature 5.5: Google Contacts Import
 
-### Phase 6: Intelligence & Growth (IN PROGRESS)
+### Phase 6: Intelligence & Growth (COMPLETE)
 - [x] Feature 6.1: Interaction Logging
 - [x] Feature 6.2: Smart Summaries
-- [ ] Feature 6.3: Reminders System
+- [x] Feature 6.3: Reminders System
 
 ---
 

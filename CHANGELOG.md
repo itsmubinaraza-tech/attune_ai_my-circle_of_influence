@@ -95,7 +95,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - PersonProfileModal now shows RelationshipSummaryCard instead of basic health bar
 - Index page now shows CircleInsightsWidget in the dashboard
 - 25 tests for summaries feature
-- **Total tests: 278 passing**
+
+#### Feature 6.3: Reminders System
+- Reminders service (`src/services/reminders.ts`) with full CRUD operations:
+  - `createReminder()` - Create one-time, recurring, or smart nudge reminders
+  - `getReminders()` - Get all reminders with optional status filter
+  - `getUpcomingReminders()` - Get reminders for next 7 days
+  - `getOverdueReminders()` - Get past due reminders
+  - `completeReminder()` - Mark as complete, auto-creates next occurrence for recurring
+  - `snoozeReminder()` - Snooze for specified duration
+  - `dismissReminder()` - Dismiss without completing
+  - `calculateNextOccurrence()` - Calculate next date for recurring reminders
+  - `generateSmartNudges()` - AI-powered nudge suggestions based on contact frequency
+- React Query hooks (`src/hooks/useReminders.ts`):
+  - `useReminders()` - Get all reminders
+  - `useUpcomingReminders()` - Get upcoming reminders
+  - `useOverdueReminders()` - Get overdue reminders
+  - `usePersonReminders()` - Get reminders for a person
+  - `useReminderStats()` - Get reminder statistics
+  - `useSmartNudges()` - Get smart nudge suggestions
+  - `useCreateReminder()` - Create reminder mutation
+  - `useCompleteReminder()` - Complete reminder mutation
+  - `useSnoozeReminder()` - Snooze reminder mutation
+  - `useDismissReminder()` - Dismiss reminder mutation
+- CreateReminderModal component:
+  - Step 1: Person selection with search
+  - Step 2: Reminder details (type, title, date, frequency)
+  - One-time and recurring reminder types
+  - Frequency options: daily, weekly, biweekly, monthly, quarterly
+- RemindersWidget component:
+  - Full and compact display modes
+  - Overdue reminders section with warning styling
+  - Upcoming reminders section
+  - Statistics display (pending, completed, overdue, completion rate)
+  - Complete, snooze (1hr, 24hr, 1wk), and dismiss actions
+  - Visual indicators for recurring and smart nudge reminders
+- Smart Nudge System:
+  - Configurable thresholds per group (work: 14d, family: 7d, friends: 14d, acquaintances: 30d)
+  - AI-generated suggested actions based on relationship type
+  - Automatic nudge creation based on last contact
+- Database types updated for enhanced reminder schema
+- 30 tests for reminders feature
+- **Total tests: 308 passing**
 
 ### Fixed - UI/UX Improvements
 - PersonSearch component now shows selected person as a chip inside the search box (not in a separate box below)
@@ -295,4 +336,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 | interactions.test.tsx | 37 |
 | import.test.tsx | 37 |
 | summaries.test.tsx | 25 |
-| **Total** | **278** |
+| reminders.test.tsx | 30 |
+| **Total** | **308** |
