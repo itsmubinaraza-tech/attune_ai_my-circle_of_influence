@@ -70,8 +70,9 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `API error: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Edge Function error response:', response.status, errorText);
+    throw new Error(`API error ${response.status}: ${errorText}`);
   }
 
   return response.json();
