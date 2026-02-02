@@ -180,7 +180,8 @@
   10. Lily Zheng - DEI, inclusive communication
 - AI selects 3 most relevant experts based on relationship type and context
 - Philosophy: App helps users CREATE connections, not be the source of joy
-- **Commit:** `aba6dcb`
+- Claude 3 Haiku model for cost-effective responses
+- **Commit:** `1ba7ddd`
 
 #### Feature 3.4: Person Context Injection (COMPLETE)
 - PersonContext builder from database records

@@ -42,6 +42,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Start new conversation button
 - All Quick Talk conversations linked to person appear in their profile
 
+### Added - Service Offering & Pricing Model Documentation
+- Comprehensive pricing strategy document (`docs/PRICING_MODEL.md`)
+- Four-tier subscription model: Free, Starter ($4.99), Growth ($9.99), Premium ($19.99)
+- Credit pack pay-as-you-go options
+- Token cost analysis and margin calculations
+- Stripe integration roadmap
+- Database schema updates for subscriptions
+- Competitive analysis
+
 ### Enhanced - AI Coaching System with Expert Perspectives
 
 #### Structured Response Format
