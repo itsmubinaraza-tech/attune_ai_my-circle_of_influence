@@ -286,13 +286,13 @@ const Index = () => {
       </div>
 
       {/* Main content - Responsive layout */}
-      <div className="relative z-10 min-h-screen flex flex-col px-3 sm:px-6 lg:px-8 py-3 sm:py-6 lg:py-8 max-w-7xl mx-auto">
+      <div className="relative z-10 min-h-screen flex flex-col px-3 sm:px-6 lg:px-8 py-2 sm:py-6 lg:py-8 max-w-7xl mx-auto">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-2 sm:mb-6 lg:mb-8"
+          className="mb-1 sm:mb-6 lg:mb-8"
         >
           <div className="flex items-center justify-between">
             {/* Mobile hamburger menu */}
@@ -370,9 +370,9 @@ const Index = () => {
         </motion.header>
 
         {/* Main Grid - Mobile: Stack, Desktop: 2 columns */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Left Column - Main Widgets */}
-          <div className="flex flex-col gap-2 sm:gap-3 lg:gap-4 lg:w-1/2 xl:w-2/5">
+        <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-8">
+          {/* Left Column - Main Widgets (fits in mobile viewport) */}
+          <div className="flex flex-col gap-1.5 sm:gap-3 lg:gap-4 lg:w-1/2 xl:w-2/5">
             {/* Part 1: Mood Check-in */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
@@ -421,7 +421,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="space-y-3"
+              className="space-y-2 sm:space-y-3"
             >
               <button
                 disabled={!isFlowComplete}
@@ -434,7 +434,7 @@ const Index = () => {
                     navigate(`/chat?${params.toString()}`);
                   }
                 }}
-                className={`w-full py-2.5 sm:py-3 lg:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-semibold text-white flex items-center justify-center gap-2 sm:gap-3 btn-liquid-primary transition-all text-sm sm:text-base ${
+                className={`w-full py-2 sm:py-3 lg:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-semibold text-white flex items-center justify-center gap-2 sm:gap-3 btn-liquid-primary transition-all text-sm sm:text-base ${
                   isFlowComplete
                     ? currentContext === "work"
                       ? "btn-context-work"
@@ -454,7 +454,7 @@ const Index = () => {
               {/* Quick Talk Button - Voice-first flow */}
               <button
                 onClick={() => setShowQuickTalkModal(true)}
-                className="w-full py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-medium text-white/90 flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:border-purple-500/50 hover:from-purple-500/30 hover:to-pink-500/30 transition-all text-sm sm:text-base group"
+                className="w-full py-2 sm:py-3 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-medium text-white/90 flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:border-purple-500/50 hover:from-purple-500/30 hover:to-pink-500/30 transition-all text-sm sm:text-base group"
               >
                 <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400 group-hover:scale-110 transition-transform" />
                 <span>Quick Talk</span>
@@ -464,8 +464,8 @@ const Index = () => {
 
           </div>
 
-          {/* Right Column - Dashboard Widgets (visible on all screens) */}
-          <div className="flex flex-col gap-3 lg:gap-4 lg:w-1/2 xl:w-3/5 mt-4 lg:mt-0">
+          {/* Right Column - Dashboard Widgets (scroll to see on mobile) */}
+          <div className="flex flex-col gap-3 lg:gap-4 lg:w-1/2 xl:w-3/5 mt-6 lg:mt-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-white/10">
             {/* Relationship Graph */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}

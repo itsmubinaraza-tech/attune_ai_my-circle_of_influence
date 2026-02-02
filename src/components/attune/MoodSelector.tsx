@@ -92,7 +92,7 @@ const MoodSelector = ({ selectedMood, onMoodSelect }: MoodSelectorProps) => {
   const isSelected = selectedMood === currentMood.value;
 
   return (
-    <div className="liquid-glass p-3 sm:p-4 lg:p-6 relative overflow-hidden h-full flex flex-col">
+    <div className="liquid-glass p-2 sm:p-4 lg:p-6 relative overflow-hidden h-full flex flex-col">
       {/* Left side glow - inside widget */}
       <motion.div
         className="absolute left-0 top-0 bottom-0 w-24 rounded-r-full pointer-events-none"

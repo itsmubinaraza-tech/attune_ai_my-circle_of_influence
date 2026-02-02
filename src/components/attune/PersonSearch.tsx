@@ -98,7 +98,7 @@ const PersonSearch = ({ people, selectedPerson, onPersonSelect, onAddPerson }: P
   const colors = selectedPerson ? (groupColors[selectedPerson.group] || defaultColors) : null;
 
   return (
-    <div className="liquid-glass p-3 sm:p-4 lg:p-6 relative overflow-hidden h-full flex flex-col">
+    <div className="liquid-glass p-2 sm:p-4 lg:p-6 relative overflow-hidden h-full flex flex-col">
       {/* Subtle animated background */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"
