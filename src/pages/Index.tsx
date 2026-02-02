@@ -9,10 +9,11 @@ import AddPersonModal from "@/components/attune/AddPersonModal";
 import PersonProfileModal from "@/components/attune/PersonProfileModal";
 import RelationshipGraph from "@/components/attune/RelationshipGraph";
 import { CircleInsightsWidget } from "@/components/attune/CircleInsightsWidget";
+import QuickTalkModal from "@/components/attune/QuickTalkModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePeopleWithAutoSeed, usePeopleNeedingAttention } from "@/hooks/usePeople";
 import { useConnections } from "@/hooks/useConnections";
-import { ArrowRight, Sparkles, Clock, AlertCircle, MessageSquare, Menu, X, UserPlus, Briefcase, Heart, Users, Phone, MessageCircle, Copy, Check, LogOut } from "lucide-react";
+import { ArrowRight, Sparkles, Clock, AlertCircle, MessageSquare, Menu, X, UserPlus, Briefcase, Heart, Users, Phone, MessageCircle, Copy, Check, LogOut, Mic } from "lucide-react";
 import { toast } from "sonner";
 import type { Person as DbPerson } from "@/types/database";
 
@@ -111,6 +112,7 @@ const Index = () => {
     phone: string;
   } | null>(null);
   const [copiedMessage, setCopiedMessage] = useState(false);
+  const [showQuickTalkModal, setShowQuickTalkModal] = useState(false);
 
   // Convert database people to display format (merge with mock data for demo)
   const people: Person[] = [
@@ -419,6 +421,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
+              className="space-y-3"
             >
               <button
                 disabled={!isFlowComplete}
@@ -446,6 +449,16 @@ const Index = () => {
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Let's Connect</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+
+              {/* Quick Talk Button - Voice-first flow */}
+              <button
+                onClick={() => setShowQuickTalkModal(true)}
+                className="w-full py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-medium text-white/90 flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:border-purple-500/50 hover:from-purple-500/30 hover:to-pink-500/30 transition-all text-sm sm:text-base group"
+              >
+                <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400 group-hover:scale-110 transition-transform" />
+                <span>Quick Talk</span>
+                <span className="text-xs text-white/50 hidden sm:inline">— just speak</span>
               </button>
             </motion.div>
 
@@ -622,6 +635,12 @@ const Index = () => {
           setShowProfileModal(false);
           setSelectedProfilePersonId(null);
         }}
+      />
+
+      {/* Quick Talk Modal - Voice-first flow */}
+      <QuickTalkModal
+        isOpen={showQuickTalkModal}
+        onClose={() => setShowQuickTalkModal(false)}
       />
 
       {/* Message Draft Modal */}
