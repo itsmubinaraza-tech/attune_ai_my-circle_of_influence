@@ -132,3 +132,45 @@ export function useUpdateLastContact() {
     },
   });
 }
+
+/**
+ * Hook to seed demo data for new users
+ */
+export function useSeedDemoData() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: peopleService.seedDemoData,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PEOPLE_KEY });
+    },
+  });
+}
+
+/**
+ * Hook to check if user has any people and auto-seed demo data
+ */
+export function usePeopleWithAutoSeed() {
+  const queryClient = useQueryClient();
+  const seedMutation = useSeedDemoData();
+
+  return useQuery({
+    queryKey: PEOPLE_KEY,
+    queryFn: async () => {
+      const people = await peopleService.getPeople();
+
+      // Auto-seed demo data for new users with empty circles
+      if (people.length === 0 && !seedMutation.isPending) {
+        try {
+          const seededPeople = await peopleService.seedDemoData();
+          return seededPeople;
+        } catch (error) {
+          console.error('Failed to seed demo data:', error);
+          return people;
+        }
+      }
+
+      return people;
+    },
+  });
+}

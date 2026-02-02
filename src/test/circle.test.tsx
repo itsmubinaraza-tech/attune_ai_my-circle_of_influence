@@ -182,7 +182,8 @@ describe('Feature 2.3: Circle Dashboard', () => {
       renderWithProviders(<Circle />);
 
       await waitFor(() => {
-        expect(screen.getByText(/people in your circle/i)).toBeInTheDocument();
+        // Header shows "X people" or "X person"
+        expect(screen.getByText(/\d+\s+people?/i)).toBeInTheDocument();
       });
     });
 

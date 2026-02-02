@@ -17,10 +17,15 @@ import {
   AlertCircle,
   ChevronDown,
   Loader2,
+  Link2,
+  Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePerson, useUpdatePerson, useArchivePerson, useDeletePerson } from '@/hooks/usePeople';
+import { useConnectionsForPerson, useDeleteConnection } from '@/hooks/useConnections';
 import { getDefaultSubgroups } from '@/services/people';
+import { getConnectionTypeLabel } from '@/services/connections';
+import AddConnectionModal from './AddConnectionModal';
 import type { GroupType, Person } from '@/types/database';
 
 interface PersonProfileModalProps {
@@ -53,13 +58,16 @@ export default function PersonProfileModal({
   onPersonDeleted,
 }: PersonProfileModalProps) {
   const { data: person, isLoading, error } = usePerson(personId);
+  const { data: connections = [], isLoading: connectionsLoading } = useConnectionsForPerson(personId);
   const updatePerson = useUpdatePerson();
   const archivePerson = useArchivePerson();
   const deletePerson = useDeletePerson();
+  const deleteConnection = useDeleteConnection();
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showAddConnectionModal, setShowAddConnectionModal] = useState(false);
 
   // Form state
   const [name, setName] = useState('');
@@ -482,6 +490,89 @@ export default function PersonProfileModal({
                 )}
               </div>
 
+              {/* Connections */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Link2 className="w-4 h-4 text-foreground/40" />
+                    <span className="text-sm font-medium text-foreground/70">Connections</span>
+                    {connections.length > 0 && (
+                      <span className="text-xs text-foreground/40">({connections.length})</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setShowAddConnectionModal(true)}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-purple-400 hover:bg-purple-500/10 transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add
+                  </button>
+                </div>
+
+                {connectionsLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-foreground/30" />
+                  </div>
+                ) : connections.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-white/5 text-center">
+                    <p className="text-sm text-foreground/50">No connections yet</p>
+                    <button
+                      onClick={() => setShowAddConnectionModal(true)}
+                      className="mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      Link to another person
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {connections.map((connection) => {
+                      const otherPerson =
+                        connection.person_a.id === personId
+                          ? connection.person_b
+                          : connection.person_a;
+                      return (
+                        <div
+                          key={connection.id}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-white/5 group"
+                        >
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                            style={{ background: groupColors[otherPerson.group as keyof typeof groupColors] }}
+                          >
+                            {otherPerson.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground/90 truncate">
+                              {otherPerson.name}
+                            </p>
+                            <p className="text-xs text-foreground/50">
+                              {getConnectionTypeLabel(connection.connection_type)}
+                              {connection.notes && (
+                                <span className="text-foreground/30"> • {connection.notes}</span>
+                              )}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (confirm('Remove this connection?')) {
+                                deleteConnection.mutate(connection.id, {
+                                  onSuccess: () => toast.success('Connection removed'),
+                                  onError: () => toast.error('Failed to remove connection'),
+                                });
+                              }
+                            }}
+                            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all"
+                            title="Remove connection"
+                          >
+                            <X className="w-3 h-3 text-red-400" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Advanced Actions */}
               <button
                 onClick={() => setShowAdvanced(!showAdvanced)}
@@ -555,6 +646,13 @@ export default function PersonProfileModal({
           )}
         </motion.div>
       </motion.div>
+
+      {/* Add Connection Modal */}
+      <AddConnectionModal
+        isOpen={showAddConnectionModal}
+        onClose={() => setShowAddConnectionModal(false)}
+        preselectedPersonId={personId}
+      />
     </AnimatePresence>
   );
 }
