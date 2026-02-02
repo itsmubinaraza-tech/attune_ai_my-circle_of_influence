@@ -77,30 +77,29 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
   return response.json();
 }
 
-// Fallback responses when API is unavailable
+// Fallback responses when API is unavailable - More actionable and practical
 const FALLBACK_RESPONSES = {
   greeting: [
-    "I'm here to help you navigate your relationships with care and understanding. What's on your mind?",
-    "Welcome! I'm your emotional intelligence coach. How can I support you today?",
-    "I can sense this is important to you. Let's work through it together.",
+    "I'm here to help you build stronger connections. Tell me: who do you want to connect with, and what's the situation? I'll give you specific things to say and do.",
+    "Let's make your relationships stronger. Who's on your mind? Share the context and I'll help you with exactly what to say, how to say it, and what to expect.",
+    "Ready to help you connect more meaningfully. What relationship would you like to work on? Be specific and I'll give you actionable guidance.",
   ],
   withPerson: (name: string, group: string) => [
-    `I understand you want to talk about ${name}. Every relationship has its nuances. What specific aspect would you like to explore?`,
-    `${name} is in your ${group} circle. Tell me more about what's happening in this relationship.`,
-    `Let's focus on your relationship with ${name}. What's been on your mind about them?`,
+    `Let's work on your relationship with ${name}. To give you the best advice, tell me: What's the specific situation? What outcome are you hoping for? Then I'll help you with exactly what to say and how to approach it.`,
+    `I want to help you connect better with ${name}. What's happening in this ${group} relationship right now? Share the details and I'll give you specific conversation starters and body language tips.`,
+    `${name} - got it. What's the challenge or opportunity here? The more context you give me, the more specific I can be about what to say, how to say it, and what response to expect.`,
   ],
   withMood: (mood: string) => [
-    `I notice you're feeling ${mood}. That's completely valid. How do you think this is affecting your approach?`,
-    `Feeling ${mood} can influence how we perceive situations. Let's explore this together.`,
+    `You're feeling ${mood} - that's important context. This emotional state will influence how you show up in the conversation. Let's work with this energy and channel it productively. What specifically do you need help with?`,
+    `Feeling ${mood} is valid. Here's the thing: your emotional state affects your tone and body language. Let's make sure you're prepared. What's the conversation or situation you're facing?`,
   ],
   general: [
-    "That's an insightful observation. Can you tell me more about what led to this thought?",
-    "I appreciate you sharing that. How does this situation make you feel?",
-    "Understanding the other person's perspective can be challenging. What do you think they might be experiencing?",
-    "It sounds like you're processing a lot. What would feel like the most supportive next step for you?",
-    "Relationships require ongoing effort from both sides. What small step could you take today?",
-    "Let's think about this from a different angle. What would your ideal outcome look like?",
-    "That's a meaningful reflection. How has this awareness changed your perspective?",
+    "Let me give you something actionable. **Try this**: Next time you see them, start with a genuine compliment or observation, then ask an open-ended question about something they care about. What specific topic could you ask about?",
+    "Here's a practical framework: **1)** Lead with curiosity, not judgment. **2)** Ask 'what' and 'how' questions, not 'why.' **3)** Reflect back what you hear before responding. What part of this feels most relevant to your situation?",
+    "**Brené Brown would say**: Vulnerability isn't weakness—it's courage. **Adam Grant would say**: Give before you ask. **Simon Sinek would say**: Start with why you value this relationship. Which approach resonates with you?",
+    "One small step you could take today: Send a brief message that shows you were thinking of them. Something like: 'Hey, I saw [something relevant] and thought of you. How are you doing?' Would that work for this situation?",
+    "Let's get specific. **What to say**: Start with something genuine you appreciate about them. **How to say it**: Warm tone, relaxed posture, good eye contact. **What to expect**: They may be surprised but will likely appreciate it. What's holding you back from trying this?",
+    "Here's the key insight: People remember how you made them feel, not what you said. Focus on being fully present and genuinely curious. What would it look like to bring that energy to your next interaction?",
   ],
 };
 
