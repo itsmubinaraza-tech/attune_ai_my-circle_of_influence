@@ -284,6 +284,7 @@
 
 ### Quick Talk (Voice-First)
 - `src/components/attune/QuickTalkModal.tsx` - Voice-first conversational flow
+- `src/components/attune/ConversationHistory.tsx` - Display past conversations in person profile
 
 ### UI Components
 - `src/components/attune/MoodSelector.tsx` - Mood widget

@@ -34,6 +34,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Chat page with context (guidance intent)
   - Log Interaction modal (update intent)
 
+#### Conversation History Integration
+- ConversationHistory component displays past coaching sessions for each person
+- Added to PersonProfileModal under "Conversations" section
+- Shows session preview, date, and message count
+- Click to continue any previous conversation
+- Start new conversation button
+- All Quick Talk conversations linked to person appear in their profile
+
 ### Added - Phase 5: Import Integrations (Features 5.2-5.5)
 
 #### Feature 5.2: Phone Contacts Import
