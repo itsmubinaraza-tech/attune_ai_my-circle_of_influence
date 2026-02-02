@@ -8,6 +8,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added - Phase 7: Quick Talk (Voice-First)
+
+#### Feature 7.1: Quick Talk Voice Flow
+- Quick Talk button on main screen (Index page) for instant voice interaction
+- QuickTalkModal component with voice-first conversational flow
+- Web Speech API integration:
+  - SpeechRecognition for voice input
+  - SpeechSynthesis for text-to-speech responses
+- Multi-step conversation flow:
+  - Greeting: App speaks "How are you feeling? Who do you want to talk about?"
+  - Listening: Captures user's mood and person mention
+  - Confirming: Verifies detected person with user
+  - Intent: Asks if user wants guidance or to update on previous conversation
+  - Ready: Routes to appropriate destination
+- Mood detection from speech (maps synonyms like "anxious"→"nervous", "great"→"happy")
+- Person detection with fuzzy name matching against user's circle
+- Intent detection: "guidance"/"help"/"advice" vs "update"/"went"/"talked"
+- Visual feedback:
+  - Animated orbs indicating listening/speaking state
+  - Status indicators for each conversation step
+  - Pulse animation during voice recording
+- Graceful fallbacks when speech APIs unavailable
+- Routes to:
+  - Chat page with context (guidance intent)
+  - Log Interaction modal (update intent)
+
 ### Added - Phase 5: Import Integrations (Features 5.2-5.5)
 
 #### Feature 5.2: Phone Contacts Import

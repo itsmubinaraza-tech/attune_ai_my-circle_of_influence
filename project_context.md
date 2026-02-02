@@ -200,6 +200,24 @@
 - Hover/press states
 - Floating orb backgrounds
 
+### Phase 7: Quick Talk (Voice-First) (COMPLETE)
+
+#### Feature 7.1: Quick Talk Voice Flow
+- Quick Talk button on main screen (Index page)
+- Voice-first conversational interface using Web Speech API
+- Text-to-speech for app responses (SpeechSynthesis)
+- Multi-step conversation flow:
+  - Greeting: "How are you feeling? Who do you want to talk about?"
+  - Mood detection from speech (maps synonyms to app moods)
+  - Person detection from speech (fuzzy matching against user's circle)
+  - Intent detection: guidance (new conversation) or update (log interaction)
+- Routes to appropriate destination:
+  - Guidance → Chat page with person/mood context
+  - Update → Log interaction modal
+- Visual feedback with animated orbs and status indicators
+- Graceful fallbacks when speech APIs unavailable
+- **Commit:** `c596457`
+
 ---
 
 ## Key Files
@@ -263,6 +281,9 @@
 - `src/types/speech.d.ts` - Web Speech API type declarations
 - `supabase/functions/chat/index.ts` - Edge function for Claude API
 - `supabase/functions/README.md` - Edge function setup guide
+
+### Quick Talk (Voice-First)
+- `src/components/attune/QuickTalkModal.tsx` - Voice-first conversational flow
 
 ### UI Components
 - `src/components/attune/MoodSelector.tsx` - Mood widget
