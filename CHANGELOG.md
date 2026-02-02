@@ -42,6 +42,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Start new conversation button
 - All Quick Talk conversations linked to person appear in their profile
 
+### Enhanced - AI Coaching System with Expert Perspectives
+
+#### Structured Response Format
+- **WHAT TO SAY**: Specific phrases, conversation starters, follow-up questions
+- **HOW TO SAY IT**: Tone of voice, body language, pacing guidance
+- **WHAT TO EXPECT**: Likely responses, handling resistance, signs of success
+- **THREE EXPERT PERSPECTIVES**: AI selects 3 most relevant from 10 experts
+- **YOUR NEXT STEP**: Clear immediate action within 24-48 hours
+
+#### 10 Thought Leaders Integrated
+1. **Brené Brown** - Vulnerability, courage, shame resilience, wholehearted living
+2. **Adam Grant** - Giving, reciprocity, networking, five-minute favors
+3. **Simon Sinek** - Start with why, trust, infinite mindset, belonging
+4. **Liz Ryan** - Human workplace, authenticity, career ownership
+5. **Marshall Goldsmith** - Behavioral change, feedforward, gratitude
+6. **Josh Bersin** - Team dynamics, belonging, inclusive leadership
+7. **Kim Scott** - Radical Candor, feedback, care personally + challenge directly
+8. **Roberta Matuson** - Talent retention, mentorship, reputation as currency
+9. **David Green** - Relationship patterns, network analysis, evidence-based
+10. **Lily Zheng** - DEI, inclusive communication, allyship, psychological safety
+
+#### Expert Selection by Relationship Type
+- **Work**: Kim Scott, Liz Ryan, Marshall Goldsmith, Adam Grant, Roberta Matuson, Josh Bersin
+- **Family**: Brené Brown, Simon Sinek, Kim Scott, Marshall Goldsmith
+- **Friends**: Brené Brown, Adam Grant, Simon Sinek, David Green
+- **Acquaintances**: Adam Grant, Liz Ryan, Lily Zheng, David Green
+
 ### Fixed - Mobile Layout Optimization
 - Main flow (Mood, Person, Outcome, Let's Connect, Quick Talk) now fits in mobile viewport
 - Dashboard widgets appear below the fold, accessible by scrolling

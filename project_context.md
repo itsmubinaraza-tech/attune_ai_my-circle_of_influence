@@ -160,6 +160,28 @@
 - Claude claude-sonnet-4-20250514 model for coaching responses
 - Token usage tracking
 
+#### Feature 3.6: Enhanced Coaching System (COMPLETE)
+- Structured response format with actionable advice:
+  - WHAT TO SAY: Specific phrases and conversation starters
+  - HOW TO SAY IT: Tone, body language, pacing guidance
+  - WHAT TO EXPECT: Likely responses and how to handle them
+  - THREE EXPERT PERSPECTIVES: Selected from 10 thought leaders
+  - YOUR NEXT STEP: Clear immediate action item
+- 10 Expert frameworks integrated:
+  1. Brené Brown - Vulnerability, courage, shame resilience
+  2. Adam Grant - Giving, reciprocity, networking
+  3. Simon Sinek - Purpose, trust, infinite mindset
+  4. Liz Ryan - Human workplace, authenticity
+  5. Marshall Goldsmith - Behavioral change, feedforward
+  6. Josh Bersin - Team dynamics, belonging
+  7. Kim Scott - Radical Candor, honest feedback
+  8. Roberta Matuson - Talent retention, mentorship
+  9. David Green - Relationship patterns, network analysis
+  10. Lily Zheng - DEI, inclusive communication
+- AI selects 3 most relevant experts based on relationship type and context
+- Philosophy: App helps users CREATE connections, not be the source of joy
+- **Commit:** `aba6dcb`
+
 #### Feature 3.4: Person Context Injection (COMPLETE)
 - PersonContext builder from database records
 - Dynamic system prompt generation with:
