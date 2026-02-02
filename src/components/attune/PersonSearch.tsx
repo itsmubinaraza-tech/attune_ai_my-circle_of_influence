@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Briefcase, Heart, Users, UserPlus } from "lucide-react";
+import { Search, X, Briefcase, Heart, Users, UserPlus, User } from "lucide-react";
 import type { Person } from "@/pages/Index";
 
 interface PersonSearchProps {
@@ -10,22 +10,27 @@ interface PersonSearchProps {
   onAddPerson?: () => void;
 }
 
-const groupIcons = {
+const groupIcons: Record<string, typeof Briefcase> = {
   work: Briefcase,
   family: Heart,
   friends: Users,
+  acquaintances: User,
 };
 
-const groupColors = {
+const groupColors: Record<string, { bg: string; text: string; border: string }> = {
   work: { bg: "rgba(99, 102, 241, 0.15)", text: "hsl(239, 84%, 67%)", border: "rgba(99, 102, 241, 0.3)" },
   family: { bg: "rgba(244, 114, 182, 0.15)", text: "hsl(330, 81%, 70%)", border: "rgba(244, 114, 182, 0.3)" },
   friends: { bg: "rgba(52, 211, 153, 0.15)", text: "hsl(160, 64%, 52%)", border: "rgba(52, 211, 153, 0.3)" },
+  acquaintances: { bg: "rgba(251, 191, 36, 0.15)", text: "hsl(45, 93%, 47%)", border: "rgba(251, 191, 36, 0.3)" },
 };
+
+const defaultColors = { bg: "rgba(156, 163, 175, 0.15)", text: "hsl(220, 9%, 46%)", border: "rgba(156, 163, 175, 0.3)" };
 
 const PersonSearch = ({ people, selectedPerson, onPersonSelect, onAddPerson }: PersonSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -82,8 +87,15 @@ const PersonSearch = ({ people, selectedPerson, onPersonSelect, onAddPerson }: P
     }
   };
 
-  const GroupIcon = selectedPerson ? groupIcons[selectedPerson.group] : null;
-  const colors = selectedPerson ? groupColors[selectedPerson.group] : null;
+  const handleClearSelection = () => {
+    onPersonSelect(null);
+    setSearchQuery("");
+    // Focus the input after clearing
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const GroupIcon = selectedPerson ? (groupIcons[selectedPerson.group] || User) : null;
+  const colors = selectedPerson ? (groupColors[selectedPerson.group] || defaultColors) : null;
 
   return (
     <div className="liquid-glass p-3 sm:p-4 lg:p-6 relative overflow-hidden h-full flex flex-col">
@@ -102,37 +114,73 @@ const PersonSearch = ({ people, selectedPerson, onPersonSelect, onAddPerson }: P
           Search or select from your circle
         </p>
 
-        {/* Glass Search Input */}
+        {/* Glass Search Input / Selected Person Display */}
         <div className="relative">
           <motion.div
-            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl transition-all duration-300 ${
+            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl transition-all duration-300 min-h-[44px] sm:min-h-[52px] ${
               isFocused
                 ? "glass-input-focused"
                 : "glass-input"
             }`}
             animate={isFocused ? { scale: 1.01 } : { scale: 1 }}
+            style={selectedPerson ? {
+              background: colors?.bg,
+              border: `1px solid ${colors?.border}`,
+              boxShadow: `0 4px 16px ${colors?.bg}`,
+            } : undefined}
           >
-            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-foreground/40 flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Who do you want to talk about?"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setTimeout(() => setIsFocused(false), 300)}
-              onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/30 text-xs sm:text-sm"
-            />
-            {(searchQuery || selectedPerson) && (
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  onPersonSelect(null);
-                }}
-                className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+            {/* Show selected person chip OR search input */}
+            {selectedPerson ? (
+              // Selected Person Chip (inside search box)
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-2 sm:gap-3 flex-1"
               >
-                <X className="w-4 h-4 text-foreground/50" />
-              </button>
+                <div
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${colors?.text}20`, border: `2px solid ${colors?.text}40` }}
+                >
+                  {GroupIcon && <GroupIcon className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: colors?.text }} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground/90 text-xs sm:text-sm truncate">{selectedPerson.name}</p>
+                  <p className="text-[10px] sm:text-xs text-foreground/60 capitalize truncate">
+                    {selectedPerson.group}{selectedPerson.subgroup ? ` · ${selectedPerson.subgroup}` : ''}
+                  </p>
+                </div>
+                <button
+                  onClick={handleClearSelection}
+                  className="p-1.5 rounded-full hover:bg-white/20 transition-colors flex-shrink-0"
+                  title="Change person"
+                >
+                  <X className="w-4 h-4 text-foreground/60" />
+                </button>
+              </motion.div>
+            ) : (
+              // Search Input
+              <>
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-foreground/40 flex-shrink-0" />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Search for someone..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 300)}
+                  onKeyDown={handleKeyDown}
+                  className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/30 text-xs sm:text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-foreground/50" />
+                  </button>
+                )}
+              </>
             )}
           </motion.div>
 
@@ -148,8 +196,8 @@ const PersonSearch = ({ people, selectedPerson, onPersonSelect, onAddPerson }: P
               >
                 {filteredPeople.length > 0 ? (
                   filteredPeople.map((person, index) => {
-                    const Icon = groupIcons[person.group];
-                    const pColors = groupColors[person.group];
+                    const Icon = groupIcons[person.group] || User;
+                    const pColors = groupColors[person.group] || defaultColors;
                     const isHighlighted = index === highlightedIndex;
                     return (
                       <motion.button
@@ -201,42 +249,6 @@ const PersonSearch = ({ people, selectedPerson, onPersonSelect, onAddPerson }: P
             )}
           </AnimatePresence>
         </div>
-
-        {/* Selected Person Display */}
-        <AnimatePresence mode="wait">
-          {selectedPerson && (
-            <motion.div
-              initial={{ opacity: 0, y: 5, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -5, scale: 0.95 }}
-              className="mt-2 sm:mt-3 p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3"
-              style={{
-                background: colors?.bg,
-                border: `1px solid ${colors?.border}`,
-                boxShadow: `0 4px 16px ${colors?.bg}`,
-              }}
-            >
-              <div
-                className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: `${colors?.text}20`, border: `2px solid ${colors?.text}40` }}
-              >
-                {GroupIcon && <GroupIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" style={{ color: colors?.text }} />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground/90 text-xs sm:text-sm lg:text-base truncate">{selectedPerson.name}</p>
-                <p className="text-[10px] sm:text-xs text-foreground/60 capitalize truncate">
-                  {selectedPerson.group} · {selectedPerson.subgroup}
-                </p>
-              </div>
-              <button
-                onClick={() => onPersonSelect(null)}
-                className="p-1 sm:p-1.5 rounded-full hover:bg-white/10 transition-colors flex-shrink-0"
-              >
-                <X className="w-3 h-3 sm:w-4 sm:h-4 text-foreground/50" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Add Person Button */}
         {onAddPerson && !selectedPerson && (
