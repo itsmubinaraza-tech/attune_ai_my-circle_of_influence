@@ -3,6 +3,26 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PersonProfileModal from '@/components/attune/PersonProfileModal';
 
+// Mock react-router-dom
+vi.mock('react-router-dom', () => ({
+  useNavigate: vi.fn(() => vi.fn()),
+}));
+
+// Mock ConversationHistory component
+vi.mock('@/components/attune/ConversationHistory', () => ({
+  default: () => <div data-testid="conversation-history">Conversation History</div>,
+  ConversationHistory: () => <div data-testid="conversation-history">Conversation History</div>,
+}));
+
+// Mock useChat hooks
+vi.mock('@/hooks/useChat', () => ({
+  useSessionsForPerson: vi.fn().mockReturnValue({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
+}));
+
 // Mock useSummaries hooks
 vi.mock('@/hooks/useSummaries', () => ({
   useRelationshipSummary: vi.fn().mockReturnValue({

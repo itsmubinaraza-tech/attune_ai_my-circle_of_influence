@@ -29,6 +29,7 @@ import { getConnectionTypeLabel } from '@/services/connections';
 import AddConnectionModal from './AddConnectionModal';
 import LogInteractionModal from './LogInteractionModal';
 import InteractionHistory from './InteractionHistory';
+import ConversationHistory from './ConversationHistory';
 import { RelationshipSummaryCard } from './RelationshipSummaryCard';
 import type { GroupType, Person } from '@/types/database';
 
@@ -586,6 +587,20 @@ export default function PersonProfileModal({
                   personId={person.id}
                   personName={person.name}
                   compact
+                />
+              </div>
+
+              {/* Conversations (AI Coaching Sessions) */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageCircle className="w-4 h-4 text-purple-400/60" />
+                  <span className="text-sm font-medium text-foreground/70">Conversations</span>
+                </div>
+                <ConversationHistory
+                  personId={person.id}
+                  personName={person.name}
+                  compact
+                  limit={3}
                 />
               </div>
 
