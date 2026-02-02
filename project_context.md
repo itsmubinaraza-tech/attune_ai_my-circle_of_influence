@@ -64,7 +64,7 @@
 - Responsive breakpoints
 - **Commit:** `7c52ff2`
 
-### Phase 2: People Management (IN PROGRESS)
+### Phase 2: People Management (COMPLETE)
 
 #### Feature 2.1: Add Person (Smart Progressive)
 - AddPersonModal component
@@ -98,6 +98,89 @@
 - 23 tests added
 - **Commit:** `397906b`
 
+#### Feature 2.4: Demo Data & Import System (COMPLETE)
+- `seedDemoData()` function creates 28 sample contacts (7 per group)
+- All demo contacts have "Mockup" as last name for easy identification
+- Demo contacts include notes: "Demo contact - feel free to edit or delete"
+- Auto-seed for new accounts with empty circles via `usePeopleWithAutoSeed` hook
+- Import dropdown menu in Circle page header with options:
+  - Load Demo Data (functional)
+  - Phone Contacts (UI ready, coming soon)
+  - LinkedIn (UI ready, coming soon)
+  - Facebook (UI ready, coming soon)
+- Empty state shows import options for new users
+- Click-outside handler to close import dropdown
+
+#### Feature 2.5: Connection Web (COMPLETE)
+- Connections service (`src/services/connections.ts`) with CRUD operations
+- React Query hooks (`src/hooks/useConnections.ts`) for data fetching
+- AddConnectionModal component for linking two people
+- Three connection types: Knows, Works with, Related to
+- PersonProfileModal shows person's connections with ability to add/remove
+- Circle page header shows total connection count
+- People cards show individual connection count indicator
+- "Link" button in Circle page header to create connections
+- Connection preview in modal before creating
+- 23 tests added for connections feature
+
+#### Feature 2.6: Interactive Relationship Graph (COMPLETE)
+- New RelationshipGraph component with force-directed layout
+- Individual people as nodes with group color coding (Work=indigo, Family=pink, Friends=green, Acquaintances=yellow)
+- Connection lines (edges) between linked people with visual type indicators
+- Interactive features: click to select, double-click for profile, drag to reposition, zoom/pan controls
+- Glow effects on hover and selection
+- Legends for groups and connection types
+- Replaced rigid relationship map on Index page "Your Circle" widget
+- Circle page retains card-based view for people
+
+### Phase 3: Talk to Me (COMPLETE)
+
+#### Feature 3.1: Chat Interface (COMPLETE)
+- Chat page (`/chat`) with full conversation UI
+- ChatInterface component with message bubbles and animations
+- Message input with Enter to send, Shift+Enter for newlines
+- Conversation history sidebar with session management
+- Context-aware empty state with suggestion prompts
+- Session persistence via Supabase coaching_sessions table
+- Navigation links added to header (Today, Circle, Talk)
+- "Let's Connect" button flows to chat with context (person, mood, outcome)
+
+#### Feature 3.2: Voice Input (COMPLETE)
+- Voice input button with Web Speech API integration
+- Real-time speech-to-text transcription
+- Visual feedback during listening (pulse animation)
+- Graceful fallback when speech recognition unavailable
+- Type declarations in `src/types/speech.d.ts`
+
+#### Feature 3.3: Claude AI Integration (COMPLETE)
+- Supabase Edge Function for secure API calls (`supabase/functions/chat/index.ts`)
+- AI service for frontend integration (`src/services/ai.ts`)
+- Context-aware system prompts with relationship details
+- Graceful fallback to local responses when API unavailable
+- Claude claude-sonnet-4-20250514 model for coaching responses
+- Token usage tracking
+
+#### Feature 3.4: Person Context Injection (COMPLETE)
+- PersonContext builder from database records
+- Dynamic system prompt generation with:
+  - Person name, group, subgroup, role
+  - User's notes about the person
+  - Relationship health score
+  - Current mood state
+  - Desired outcome goal
+- Context bar displays conversation context in UI
+
+#### Feature 3.5: Conversation Limits & Credits (COMPLETE)
+- Credits service (`src/services/credits.ts`) for usage tracking
+- Monthly credit system (50 credits/month default)
+- Automatic monthly reset on first of each month
+- CreditsDisplay component (compact and full modes)
+- Credit deduction per message sent
+- Low credits warning (≤10 remaining)
+- Empty credits blocking with reset date info
+- 33 tests added for chat and credits
+- **Total tests: 179 passing**
+
 ### Phase 4: Visual Polish (COMPLETE)
 
 #### Feature 4.1: Mood Widget
@@ -105,10 +188,12 @@
 - Check/cancel icons on selection
 - Glow effects
 
-#### Feature 4.2: Relationship Map
-- Bubble clusters (Work, Family, Friends)
-- SVG edges connecting nodes
-- Group filter buttons
+#### Feature 4.2: Relationship Graph (Updated)
+- Force-directed graph layout with physics simulation
+- Individual people as interactive nodes
+- Connection edges with type-specific styling
+- Zoom, pan, and drag interactivity
+- Group and connection type legends
 
 #### Feature 4.3: Animations & Micro-interactions
 - Page transitions
@@ -132,11 +217,30 @@
 - `src/pages/ForgotPassword.tsx` - Password reset
 
 ### People Management
-- `src/services/people.ts` - CRUD operations
-- `src/hooks/usePeople.ts` - React Query hooks
+- `src/services/people.ts` - CRUD operations + `seedDemoData()` function
+- `src/hooks/usePeople.ts` - React Query hooks + `usePeopleWithAutoSeed`, `useSeedDemoData`
 - `src/components/attune/AddPersonModal.tsx` - Add person form
-- `src/components/attune/PersonProfileModal.tsx` - View/edit person profile
-- `src/pages/Circle.tsx` - Circle Dashboard page
+- `src/components/attune/PersonProfileModal.tsx` - View/edit person profile with connections
+- `src/pages/Circle.tsx` - Circle Dashboard page with Import dropdown and Link button
+
+### Connections
+- `src/services/connections.ts` - Connection CRUD operations
+- `src/hooks/useConnections.ts` - React Query hooks for connections
+- `src/components/attune/AddConnectionModal.tsx` - Create connections between people
+- `src/components/attune/RelationshipGraph.tsx` - Force-directed graph visualization
+
+### Chat / Talk to Me
+- `src/pages/Chat.tsx` - Main chat page with history sidebar
+- `src/components/attune/ChatInterface.tsx` - Chat UI with messages and input
+- `src/components/attune/CreditsDisplay.tsx` - Credits usage display
+- `src/services/chat.ts` - Coaching session CRUD operations
+- `src/services/credits.ts` - Credits management service
+- `src/services/ai.ts` - Claude AI integration service
+- `src/hooks/useChat.ts` - React Query hooks for chat sessions
+- `src/hooks/useCredits.ts` - React Query hooks for credits
+- `src/types/speech.d.ts` - Web Speech API type declarations
+- `supabase/functions/chat/index.ts` - Edge function for Claude API
+- `supabase/functions/README.md` - Edge function setup guide
 
 ### UI Components
 - `src/components/attune/MoodSelector.tsx` - Mood widget
@@ -151,7 +255,9 @@
 - `src/test/people.test.tsx` - 20 tests
 - `src/test/person-profile.test.tsx` - 17 tests
 - `src/test/circle.test.tsx` - 23 tests
-- **Total: 123 tests passing**
+- `src/test/connections.test.tsx` - 23 tests
+- `src/test/chat.test.tsx` - 33 tests
+- **Total: 179 tests passing**
 
 ---
 
@@ -191,22 +297,25 @@ a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
 
 ## Remaining Features
 
-### Phase 2: People Management
+### Phase 2: People Management (COMPLETE)
 - [x] Feature 2.2: Person Profile View
 - [x] Feature 2.3: Circle Dashboard (People List)
-- [ ] Feature 2.4: Connection Web (Person-to-Person Links)
+- [x] Feature 2.4: Demo Data & Import System (UI complete, integrations pending)
+- [x] Feature 2.5: Connection Web (Person-to-Person Links)
 
-### Phase 3: Talk to Me (Core AI Feature)
-- [ ] Feature 3.1: Chat Interface
-- [ ] Feature 3.2: Voice Input (Web Speech API)
-- [ ] Feature 3.3: Claude AI Integration
-- [ ] Feature 3.4: Person Context Injection
-- [ ] Feature 3.5: Conversation Limits & Credits
+### Phase 3: Talk to Me (Core AI Feature) - COMPLETE
+- [x] Feature 3.1: Chat Interface
+- [x] Feature 3.2: Voice Input (Web Speech API)
+- [x] Feature 3.3: Claude AI Integration
+- [x] Feature 3.4: Person Context Injection
+- [x] Feature 3.5: Conversation Limits & Credits
 
 ### Phase 5: Import & Connections
-- [ ] Feature 5.1: Manual Add Person (Enhanced)
-- [ ] Feature 5.2: Google Contacts Import
-- [ ] Feature 5.3: LinkedIn Import
+- [x] Feature 5.1: Demo Data Seeding (28 Mockup contacts)
+- [ ] Feature 5.2: Phone Contacts Import (UI ready)
+- [ ] Feature 5.3: LinkedIn Import (UI ready)
+- [ ] Feature 5.4: Facebook Import (UI ready)
+- [ ] Feature 5.5: Google Contacts Import
 
 ### Phase 6: Intelligence & Growth
 - [ ] Feature 6.1: Interaction Logging
@@ -251,4 +360,4 @@ npm run lint
 
 ---
 
-*Last Updated: January 31, 2026*
+*Last Updated: February 1, 2026*
