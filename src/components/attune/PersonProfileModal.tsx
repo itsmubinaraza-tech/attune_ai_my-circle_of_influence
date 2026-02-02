@@ -19,6 +19,7 @@ import {
   Loader2,
   Link2,
   Plus,
+  MessageCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePerson, useUpdatePerson, useArchivePerson, useDeletePerson } from '@/hooks/usePeople';
@@ -26,6 +27,8 @@ import { useConnectionsForPerson, useDeleteConnection } from '@/hooks/useConnect
 import { getDefaultSubgroups } from '@/services/people';
 import { getConnectionTypeLabel } from '@/services/connections';
 import AddConnectionModal from './AddConnectionModal';
+import LogInteractionModal from './LogInteractionModal';
+import InteractionHistory from './InteractionHistory';
 import type { GroupType, Person } from '@/types/database';
 
 interface PersonProfileModalProps {
@@ -68,6 +71,7 @@ export default function PersonProfileModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showAddConnectionModal, setShowAddConnectionModal] = useState(false);
+  const [showLogInteractionModal, setShowLogInteractionModal] = useState(false);
 
   // Form state
   const [name, setName] = useState('');
@@ -573,6 +577,28 @@ export default function PersonProfileModal({
                 )}
               </div>
 
+              {/* Interactions */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 text-foreground/40" />
+                    <span className="text-sm font-medium text-foreground/70">Interactions</span>
+                  </div>
+                  <button
+                    onClick={() => setShowLogInteractionModal(true)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Log Interaction
+                  </button>
+                </div>
+                <InteractionHistory
+                  personId={person.id}
+                  personName={person.name}
+                  compact
+                />
+              </div>
+
               {/* Advanced Actions */}
               <button
                 onClick={() => setShowAdvanced(!showAdvanced)}
@@ -653,6 +679,15 @@ export default function PersonProfileModal({
         onClose={() => setShowAddConnectionModal(false)}
         preselectedPersonId={personId}
       />
+
+      {/* Log Interaction Modal */}
+      {person && (
+        <LogInteractionModal
+          isOpen={showLogInteractionModal}
+          onClose={() => setShowLogInteractionModal(false)}
+          person={person}
+        />
+      )}
     </AnimatePresence>
   );
 }

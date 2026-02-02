@@ -229,6 +229,12 @@
 - `src/components/attune/AddConnectionModal.tsx` - Create connections between people
 - `src/components/attune/RelationshipGraph.tsx` - Force-directed graph visualization
 
+### Interactions
+- `src/services/interactions.ts` - Interaction CRUD operations and statistics
+- `src/hooks/useInteractions.ts` - React Query hooks for interactions
+- `src/components/attune/LogInteractionModal.tsx` - 3-step wizard to log interactions
+- `src/components/attune/InteractionHistory.tsx` - Display past interactions
+
 ### Chat / Talk to Me
 - `src/pages/Chat.tsx` - Main chat page with history sidebar
 - `src/components/attune/ChatInterface.tsx` - Chat UI with messages and input
@@ -257,7 +263,8 @@
 - `src/test/circle.test.tsx` - 23 tests
 - `src/test/connections.test.tsx` - 23 tests
 - `src/test/chat.test.tsx` - 33 tests
-- **Total: 179 tests passing**
+- `src/test/interactions.test.tsx` - 37 tests
+- **Total: 216 tests passing**
 
 ---
 
@@ -318,7 +325,7 @@ a2d0bb2 feat(auth): Add OAuth support for Google, GitHub, and Apple
 - [ ] Feature 5.5: Google Contacts Import
 
 ### Phase 6: Intelligence & Growth
-- [ ] Feature 6.1: Interaction Logging
+- [x] Feature 6.1: Interaction Logging
 - [ ] Feature 6.2: Smart Summaries
 - [ ] Feature 6.3: Reminders System
 

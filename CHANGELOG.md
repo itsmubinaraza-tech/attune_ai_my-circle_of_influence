@@ -8,6 +8,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added - Feature 6.1: Interaction Logging
+- Interactions service (`src/services/interactions.ts`) with full CRUD operations
+- React Query hooks (`src/hooks/useInteractions.ts`) for data fetching
+- LogInteractionModal component with 3-step wizard:
+  - Step 1: Type selection (call, video, meeting, message, email, social, event, other) and date
+  - Step 2: Outcome selection (successful, partial, unsuccessful) and mood tracking (before/after)
+  - Step 3: Reflection notes (what worked, what could improve, additional notes)
+- InteractionHistory component for viewing past interactions with a person
+- Automatic relationship health updates based on interaction outcomes:
+  - Successful: +10 points
+  - Partial: +3 points
+  - Unsuccessful: -5 points
+- Interaction statistics (total, successful count, average per month)
+- PersonProfileModal updated with Interactions section and "Log Interaction" button
+- Database trigger auto-updates last_contact when interaction is logged
+- 37 tests for interactions feature
+- **Total tests: 216 passing**
+
 ### Fixed - UI/UX Improvements
 - PersonSearch component now shows selected person as a chip inside the search box (not in a separate box below)
 - Added support for "acquaintances" group in PersonSearch with User icon and yellow color scheme
@@ -203,4 +221,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 | circle.test.tsx | 23 |
 | connections.test.tsx | 23 |
 | chat.test.tsx | 33 |
-| **Total** | **179** |
+| interactions.test.tsx | 37 |
+| **Total** | **216** |
