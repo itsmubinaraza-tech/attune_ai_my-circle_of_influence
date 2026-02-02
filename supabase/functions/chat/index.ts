@@ -330,7 +330,7 @@ serve(async (req) => {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-3-haiku-20240307',
         max_tokens: 2048,
         system: systemPrompt,
         messages: claudeMessages,
@@ -339,8 +339,8 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('Claude API error:', errorData);
-      throw new Error(`Claude API error: ${response.status}`);
+      console.error('Claude API error:', response.status, errorData);
+      throw new Error(`Claude API error: ${response.status} - ${errorData}`);
     }
 
     const data = await response.json();
