@@ -306,14 +306,20 @@ const Index = () => {
                 <Menu className="w-5 h-5 text-foreground/70" />
               )}
             </button>
-            <div className="hidden lg:block w-10 lg:w-auto">
-              {/* Logo area for web */}
-              <span className="text-xl font-bold text-foreground/80">🌿</span>
-            </div>
-            <div className="text-center lg:text-left lg:flex-1 lg:ml-4">
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground/90 tracking-tight">
+            <div className="hidden lg:flex items-center gap-3">
+              {/* Logo */}
+              <img src="/favicon.svg" alt="Attune" className="w-8 h-8" />
+              <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Attune
               </h1>
+            </div>
+            <div className="text-center lg:hidden">
+              <div className="flex items-center justify-center gap-2">
+                <img src="/favicon.svg" alt="Attune" className="w-6 h-6" />
+                <h1 className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Attune
+                </h1>
+              </div>
               <p className="text-xs sm:text-sm text-foreground/50 hidden sm:block">
                 Connect with intention
               </p>

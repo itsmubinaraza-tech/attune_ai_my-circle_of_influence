@@ -65,10 +65,10 @@ export default function SignIn() {
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring' }}
-            className="inline-flex items-center gap-2 mb-4"
+            className="inline-flex items-center gap-3 mb-4"
           >
-            <Sparkles className="w-8 h-8 text-purple-400" />
-            <span className="text-3xl font-bold text-white">Attune</span>
+            <img src="/favicon.svg" alt="Attune" className="w-10 h-10" />
+            <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Attune</span>
           </motion.div>
           <p className="text-white/60">Sign in to your circle</p>
         </div>
