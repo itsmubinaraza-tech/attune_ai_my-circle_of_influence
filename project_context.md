@@ -258,6 +258,64 @@
 - Optimized button spacing for touch targets
 - **Commit:** `3d80b93`
 
+### Phase 8: Mobile App & PWA (IN PROGRESS)
+
+#### Feature 8.1: PWA Infrastructure (COMPLETE)
+- Web App Manifest (`public/manifest.json`):
+  - Full app configuration (name, description, colors)
+  - Icon definitions for all sizes (72x72 to 512x512)
+  - Display mode: standalone (native app feel)
+  - App shortcuts for Quick Talk, Circle, and Chat
+  - Screenshot definitions for app stores
+- Service Worker (`public/sw.js`):
+  - Static asset caching on install
+  - Network-first strategy for API calls
+  - Cache-first strategy for static assets
+  - Offline fallback page
+  - Push notification support (infrastructure ready)
+  - Background sync capability (infrastructure ready)
+- Offline page (`public/offline.html`) with branded styling
+
+#### Feature 8.2: PWA Meta Tags & Optimization (COMPLETE)
+- Enhanced `index.html` with:
+  - Full PWA meta tags (theme-color, mobile-web-app-capable)
+  - Apple-specific tags (apple-mobile-web-app-capable, status-bar-style)
+  - Apple touch icons and splash screen links
+  - Microsoft tile configuration
+  - Service worker registration script
+  - Viewport optimized for native app feel
+
+#### Feature 8.3: PWA React Integration (COMPLETE)
+- `usePWA` hook (`src/hooks/usePWA.ts`):
+  - Install prompt detection and handling
+  - Online/offline status tracking
+  - App update detection
+  - Installable state detection
+- `useOfflineSync` hook for queuing offline actions
+- PWA Components (`src/components/attune/InstallPrompt.tsx`):
+  - `InstallPrompt` - Prompts users to install the app (delayed, dismissable)
+  - `OfflineIndicator` - Shows online/offline status banner
+  - `UpdatePrompt` - Notifies users of app updates
+
+#### Feature 8.4: Mobile App Strategy Documentation (COMPLETE)
+- Comprehensive strategy document (`docs/MOBILE_APP_STRATEGY.md`)
+- PWA implementation guide and checklist
+- React Native with Expo roadmap
+- Shared code architecture (web + mobile)
+- Native feature implementation guides:
+  - Contacts import with expo-contacts
+  - Push notifications with expo-notifications
+  - Biometric auth with expo-local-authentication
+  - Haptic feedback with expo-haptics
+- App store submission checklist (iOS + Android)
+- Development timeline and cost analysis
+
+#### Pending: Icon Generation
+- Icon generation guide (`scripts/generate-pwa-icons.md`)
+- Need to generate icon assets in all sizes
+- Need Apple splash screens
+- Need OG image for social sharing
+
 ---
 
 ## Key Files
@@ -325,6 +383,15 @@
 ### Quick Talk (Voice-First)
 - `src/components/attune/QuickTalkModal.tsx` - Voice-first conversational flow
 - `src/components/attune/ConversationHistory.tsx` - Display past conversations in person profile
+
+### PWA (Progressive Web App)
+- `public/manifest.json` - Web app manifest with icons and shortcuts
+- `public/sw.js` - Service worker for caching and offline support
+- `public/offline.html` - Offline fallback page
+- `src/hooks/usePWA.ts` - PWA hooks for install/update/offline detection
+- `src/components/attune/InstallPrompt.tsx` - Install prompt and offline indicator components
+- `scripts/generate-pwa-icons.md` - Icon generation guide
+- `docs/MOBILE_APP_STRATEGY.md` - Comprehensive mobile app strategy
 
 ### UI Components
 - `src/components/attune/MoodSelector.tsx` - Mood widget
