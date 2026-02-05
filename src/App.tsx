@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { InstallPrompt, OfflineIndicator, UpdatePrompt } from "@/components/attune/InstallPrompt";
 import Index from "./pages/Index";
 import Circle from "./pages/Circle";
 import Chat from "./pages/Chat";
@@ -18,6 +19,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <OfflineIndicator />
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -55,6 +57,9 @@ const App = () => (
           </Routes>
         </AuthProvider>
       </BrowserRouter>
+      {/* PWA Install & Update Prompts */}
+      <InstallPrompt delay={60000} />
+      <UpdatePrompt />
     </TooltipProvider>
   </QueryClientProvider>
 );
