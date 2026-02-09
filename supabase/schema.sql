@@ -269,7 +269,8 @@ BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path = '';
 
 -- Apply updated_at trigger to tables
 CREATE TRIGGER update_profiles_updated_at
@@ -288,15 +289,16 @@ CREATE TRIGGER update_user_credits_updated_at
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO profiles (id, email, full_name)
+  INSERT INTO public.profiles (id, email, full_name)
   VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name');
 
-  INSERT INTO user_credits (user_id)
+  INSERT INTO public.user_credits (user_id)
   VALUES (NEW.id);
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = '';
 
 -- Trigger to create profile on signup
 CREATE TRIGGER on_auth_user_created
@@ -307,13 +309,14 @@ CREATE TRIGGER on_auth_user_created
 CREATE OR REPLACE FUNCTION update_last_contact()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE people
+  UPDATE public.people
   SET last_contact = NEW.interaction_date
   WHERE id = NEW.person_id
     AND (last_contact IS NULL OR last_contact < NEW.interaction_date);
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path = '';
 
 CREATE TRIGGER update_person_last_contact
   AFTER INSERT ON interactions
