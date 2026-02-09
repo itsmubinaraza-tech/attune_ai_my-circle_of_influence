@@ -157,11 +157,11 @@ export default function RelationshipGraph({
           const node = newNodes[i];
           if (node.fixed || node.id === draggedNode) continue;
 
-          // Center gravity (weak)
+          // Center gravity (very weak for slow movement)
           const dx = centerX - node.x;
           const dy = centerY - node.y;
-          node.vx += dx * 0.001;
-          node.vy += dy * 0.001;
+          node.vx += dx * 0.0003;
+          node.vy += dy * 0.0003;
 
           // Repulsion from other nodes
           for (let j = 0; j < newNodes.length; j++) {
@@ -173,7 +173,7 @@ export default function RelationshipGraph({
             const minDist = node.radius + other.radius + 15;
 
             if (dist < minDist) {
-              const force = (minDist - dist) / dist * 0.5;
+              const force = (minDist - dist) / dist * 0.15;
               node.vx += ddx * force;
               node.vy += ddy * force;
             }
@@ -189,18 +189,18 @@ export default function RelationshipGraph({
                 const ddy = other.y - node.y;
                 const dist = Math.sqrt(ddx * ddx + ddy * ddy) || 1;
                 const idealDist = 80;
-                const force = (dist - idealDist) * 0.01;
+                const force = (dist - idealDist) * 0.003;
                 node.vx += (ddx / dist) * force;
                 node.vy += (ddy / dist) * force;
               }
             }
           });
 
-          // Apply velocity with damping
+          // Apply velocity with strong damping for slow, smooth movement
           node.x += node.vx;
           node.y += node.vy;
-          node.vx *= 0.9;
-          node.vy *= 0.9;
+          node.vx *= 0.95;
+          node.vy *= 0.95;
 
           // Boundary constraints
           const padding = node.radius + 10;
