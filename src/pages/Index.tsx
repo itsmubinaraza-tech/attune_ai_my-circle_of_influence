@@ -320,8 +320,8 @@ const Index = () => {
         />
       </div>
 
-      {/* Main content - Single screen height layout */}
-      <div className="relative z-10 h-screen flex flex-col px-3 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 max-w-7xl mx-auto overflow-hidden">
+      {/* Main content - Scrollable on mobile, single screen on desktop */}
+      <div className="relative z-10 min-h-screen lg:h-screen flex flex-col px-3 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 max-w-7xl mx-auto lg:overflow-hidden">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -534,8 +534,8 @@ const Index = () => {
           <HeroSection />
         </div>
 
-        {/* Main Grid - Mobile: Stack (single screen), Desktop: 2 columns */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-2 lg:gap-6 min-h-0 overflow-hidden">
+        {/* Main Grid - Mobile: Stack (scrollable), Desktop: 2 columns (fixed height) */}
+        <div className="flex-1 flex flex-col lg:flex-row gap-3 lg:gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
           {/* Left Column - Main Widgets (fits in viewport) */}
           <div className="flex flex-col gap-1 sm:gap-2 lg:gap-2 lg:w-1/2 xl:w-2/5 min-h-0">
             {/* Part 1: Mood Check-in */}
@@ -628,14 +628,14 @@ const Index = () => {
 
           </div>
 
-          {/* Right Column - Dashboard Widgets (hidden on mobile, visible on desktop) */}
-          <div className="hidden lg:flex flex-col gap-2 lg:gap-3 lg:w-1/2 xl:w-3/5 min-h-0 overflow-hidden">
+          {/* Right Column - Dashboard Widgets (visible on all screens) */}
+          <div className="flex flex-col gap-3 lg:gap-3 lg:w-1/2 xl:w-3/5 min-h-0 lg:overflow-hidden mt-4 lg:mt-0">
             {/* Relationship Graph */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="liquid-glass p-3 sm:p-4 flex-1 min-h-0 flex flex-col"
+              className="liquid-glass p-3 sm:p-4 min-h-[250px] lg:flex-1 lg:min-h-0 flex flex-col"
               data-onboarding="circle-widget"
             >
               <div className="flex items-center justify-between mb-2">
@@ -671,14 +671,14 @@ const Index = () => {
               <CircleInsightsWidget compact />
             </motion.section>
 
-            {/* Bottom row - two columns on larger screens */}
-            <div className="grid grid-cols-2 gap-3 flex-shrink-0">
+            {/* Bottom row - single column on mobile, two columns on tablet+ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-shrink-0">
               {/* Needs Attention */}
               <motion.section
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                className="liquid-glass p-3 max-h-[180px] overflow-y-auto"
+                className="liquid-glass p-3 lg:max-h-[180px] overflow-y-auto"
                 data-onboarding="needs-attention"
               >
                 <div className="flex items-center gap-2 mb-2">
@@ -746,7 +746,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
-                className="liquid-glass p-3 max-h-[180px] overflow-y-auto"
+                className="liquid-glass p-3 lg:max-h-[180px] overflow-y-auto"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <MessageSquare className="w-4 h-4 text-foreground/60" />
