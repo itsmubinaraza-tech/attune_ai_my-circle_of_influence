@@ -32,6 +32,7 @@ import AddConnectionModal from '@/components/attune/AddConnectionModal';
 import ImportContactsModal from '@/components/attune/ImportContactsModal';
 import type { Person, GroupType } from '@/types/database';
 import type { ImportSource } from '@/services/import';
+import type { ThemeName } from '@/components/attune/ThemeSelector';
 
 type SortOption = 'name' | 'last_contact' | 'relationship_health';
 type FilterGroup = 'all' | GroupType;
@@ -65,6 +66,24 @@ export default function Circle() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importSource, setImportSource] = useState<ImportSource>('csv');
   const importMenuRef = useRef<HTMLDivElement>(null);
+
+  // Apply theme from localStorage (same as Index.tsx)
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("attune-theme") as ThemeName | null;
+    if (savedTheme) {
+      // Remove all theme classes
+      document.body.classList.remove(
+        "theme-warm-earth",
+        "theme-dark-mode",
+        "theme-dark-purple",
+        "theme-ocean-depth",
+        "theme-serene-nature",
+        "theme-calming-video"
+      );
+      // Add current theme class
+      document.body.classList.add(`theme-${savedTheme}`);
+    }
+  }, []);
 
   const openImportModal = (source: ImportSource) => {
     setImportSource(source);
@@ -183,8 +202,7 @@ export default function Circle() {
 
   return (
     <div className="min-h-screen">
-      {/* Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] -z-10" />
+      {/* Background ambient orbs - colors inherit from theme */}
       <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -z-10" />
       <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl -z-10" />
 

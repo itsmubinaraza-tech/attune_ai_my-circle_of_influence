@@ -104,7 +104,7 @@ const ThemeSelector = ({ currentTheme, onThemeChange }: ThemeSelectorProps) => {
         whileTap={{ scale: 0.98 }}
       >
         <Palette className="w-4 h-4" />
-        <span className="text-sm font-medium hidden sm:inline">{selectedTheme.name}</span>
+        <span className="text-sm font-medium hidden sm:inline">Choose Theme</span>
       </motion.button>
 
       {/* Theme Dropdown */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import MoodSelector from "@/components/attune/MoodSelector";
@@ -135,22 +135,8 @@ const Index = () => {
   const [copiedMessage, setCopiedMessage] = useState(false);
   const [showQuickTalkModal, setShowQuickTalkModal] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
-  const [showFloatingMic, setShowFloatingMic] = useState(false);
-  const quickTalkButtonRef = useRef<HTMLButtonElement>(null);
-
-  // Track scroll to show/hide floating mic on mobile
-  useEffect(() => {
-    const handleScroll = () => {
-      if (quickTalkButtonRef.current) {
-        const rect = quickTalkButtonRef.current.getBoundingClientRect();
-        // Show floating mic when the main Quick Talk button scrolls out of view
-        setShowFloatingMic(rect.bottom < 0);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Floating mic is always visible
+  const showFloatingMic = true;
 
   // Start onboarding for new anonymous users
   useEffect(() => {
@@ -334,8 +320,8 @@ const Index = () => {
         />
       </div>
 
-      {/* Main content - Responsive layout */}
-      <div className="relative z-10 min-h-screen flex flex-col px-3 sm:px-6 lg:px-8 py-2 sm:py-6 lg:py-8 max-w-7xl mx-auto">
+      {/* Main content - Responsive layout, single screen height on mobile */}
+      <div className="relative z-10 h-screen lg:min-h-screen flex flex-col px-3 sm:px-6 lg:px-8 py-2 sm:py-4 lg:py-8 max-w-7xl mx-auto overflow-hidden lg:overflow-visible">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -436,9 +422,36 @@ const Index = () => {
                   {user ? (
                     <>
                       <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 bg-white/10 transition-colors">Today</Link>
-                      <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">My Circle</Link>
-                      <Link to="/chat" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Talk to Me</Link>
-                      <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Profile</a>
+                      <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Circle of Influence
+                        </span>
+                      </Link>
+                      <Link to="/chat" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4" />
+                          Talk to Me
+                        </span>
+                      </Link>
+                      <Link to="/chat" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          Recent Conversations
+                        </span>
+                      </Link>
+                      <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-amber-400" />
+                          Needs Attention
+                        </span>
+                      </Link>
+                      <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <UserCog className="w-4 h-4" />
+                          Profile
+                        </span>
+                      </a>
                       <div className="border-t border-white/10 pt-2 mt-2">
                         <button
                           onClick={handleSignOut}
@@ -451,7 +464,7 @@ const Index = () => {
                     </>
                   ) : (
                     <>
-                      <div className="flex items-center justify-between py-2 px-4">
+                      <div className="flex items-center justify-between py-2 px-4 mb-2">
                         <span className="text-sm text-foreground/60">Free messages</span>
                         <span className="text-sm font-medium text-purple-400">{anonymousCredits}/{maxAnonymousCredits}</span>
                       </div>
@@ -465,6 +478,30 @@ const Index = () => {
                         <HelpCircle className="w-4 h-4" />
                         Take a Tour
                       </button>
+                      <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Circle of Influence
+                        </span>
+                      </Link>
+                      <Link to="/chat" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4" />
+                          Talk to Me
+                        </span>
+                      </Link>
+                      <Link to="/chat" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          Recent Conversations
+                        </span>
+                      </Link>
+                      <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-amber-400" />
+                          Needs Attention
+                        </span>
+                      </Link>
                       <div className="border-t border-white/10 pt-2 mt-2 space-y-2">
                         <Link
                           to="/signin"
@@ -495,10 +532,10 @@ const Index = () => {
           <HeroSection />
         )}
 
-        {/* Main Grid - Mobile: Stack, Desktop: 2 columns */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-8">
-          {/* Left Column - Main Widgets (fits in mobile viewport) */}
-          <div className="flex flex-col gap-1.5 sm:gap-3 lg:gap-4 lg:w-1/2 xl:w-2/5">
+        {/* Main Grid - Mobile: Stack (single screen), Desktop: 2 columns */}
+        <div className="flex-1 flex flex-col lg:flex-row gap-2 lg:gap-8 min-h-0">
+          {/* Left Column - Main Widgets (fits in mobile viewport without scrolling) */}
+          <div className="flex flex-col gap-1 sm:gap-2 lg:gap-4 lg:w-1/2 xl:w-2/5 flex-1 min-h-0">
             {/* Part 1: Mood Check-in */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
@@ -585,31 +622,12 @@ const Index = () => {
                 <span>Let's Connect</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-
-              {/* Quick Talk Button - Voice-first flow */}
-              <button
-                ref={quickTalkButtonRef}
-                onClick={() => {
-                  // Check if anonymous user has reached limit
-                  if (!user && anonymousLimitReached) {
-                    setShowUpgradePrompt(true);
-                    return;
-                  }
-                  setShowQuickTalkModal(true);
-                }}
-                data-onboarding="quick-talk"
-                className="w-full py-2 sm:py-3 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-medium text-white/90 flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:border-purple-500/50 hover:from-purple-500/30 hover:to-pink-500/30 transition-all text-sm sm:text-base group"
-              >
-                <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400 group-hover:scale-110 transition-transform" />
-                <span>Quick Talk</span>
-                <span className="text-xs text-white/50 hidden sm:inline">— just speak</span>
-              </button>
             </motion.div>
 
           </div>
 
-          {/* Right Column - Dashboard Widgets (scroll to see on mobile) */}
-          <div className="flex flex-col gap-3 lg:gap-4 lg:w-1/2 xl:w-3/5 mt-6 lg:mt-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-white/10">
+          {/* Right Column - Dashboard Widgets (hidden on mobile, visible on desktop) */}
+          <div className="hidden lg:flex flex-col gap-3 lg:gap-4 lg:w-1/2 xl:w-3/5">
             {/* Relationship Graph */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
@@ -618,7 +636,7 @@ const Index = () => {
               className="liquid-glass p-4 sm:p-6 lg:flex-1 min-h-[280px]"
             >
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base sm:text-lg font-medium text-foreground/90">Your Circle</h3>
+                <h3 className="text-base sm:text-lg font-medium text-foreground/90">Your Circle of Influence</h3>
                 <Link
                   to="/circle"
                   className="text-xs text-purple-400 hover:text-purple-300 transition-colors"

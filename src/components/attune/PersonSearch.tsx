@@ -30,9 +30,20 @@ const PersonSearch = ({ people, selectedPerson, onPersonSelect, onAddPerson }: P
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Auto-select the first person on initial load (only once)
+  useEffect(() => {
+    if (!hasAutoSelected && !selectedPerson && people.length > 0) {
+      // Pick a random person from the list to show as default
+      const randomIndex = Math.floor(Math.random() * Math.min(people.length, 5));
+      onPersonSelect(people[randomIndex]);
+      setHasAutoSelected(true);
+    }
+  }, [people, selectedPerson, hasAutoSelected, onPersonSelect]);
 
   const filteredPeople = useMemo(() => {
     if (!searchQuery.trim()) return [];
