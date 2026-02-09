@@ -82,19 +82,19 @@ export function CircleInsightsWidget({ compact = false }: CircleInsightsWidgetPr
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white/5 rounded-lg p-4 space-y-3"
+        className="bg-white/5 rounded-lg p-2.5 space-y-1.5"
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-purple-400" />
-            <span className="text-sm font-medium text-white">Circle Health</span>
+          <div className="flex items-center gap-1.5">
+            <Activity className="h-3.5 w-3.5 text-purple-400" />
+            <span className="text-xs font-medium text-white">Circle Health</span>
           </div>
-          <span className={cn('text-lg font-bold', getHealthColor(insights.averageHealth))}>
+          <span className={cn('text-sm font-bold', getHealthColor(insights.averageHealth))}>
             {insights.averageHealth}%
           </span>
         </div>
 
-        <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-white/10">
+        <div className="flex gap-0.5 h-1.5 rounded-full overflow-hidden bg-white/10">
           {insights.healthDistribution.healthy > 0 && (
             <div
               className="bg-green-500 transition-all"
@@ -121,11 +121,11 @@ export function CircleInsightsWidget({ compact = false }: CircleInsightsWidgetPr
           )}
         </div>
 
-        <div className="flex items-center justify-between text-xs text-white/60">
+        <div className="flex items-center justify-between text-[10px] text-white/60">
           <span>{insights.totalPeople} people</span>
           <div className="flex items-center gap-1">
             {getTrendIcon()}
-            <span>{getTrendLabel()} this week</span>
+            <span>{getTrendLabel()}</span>
           </div>
         </div>
       </motion.div>

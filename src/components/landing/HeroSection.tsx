@@ -46,18 +46,18 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="text-center py-6 sm:py-8 lg:py-12"
+      className="text-center py-2 sm:py-3 lg:py-4"
     >
       {/* Main headline */}
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground/90 leading-tight mb-4">
+      <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground/90 leading-tight mb-1 sm:mb-2">
         Practical advice to talk to your{' '}
-        <span className="relative inline-block min-w-[120px] sm:min-w-[150px]">
+        <span className="relative inline-block min-w-[80px] sm:min-w-[100px]">
           <AnimatePresence mode="wait">
             <motion.span
               key={currentRelationship}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4 }}
               className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
             >
@@ -68,19 +68,19 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
       </h1>
 
       {/* Scrolling outcomes */}
-      <div className="h-12 sm:h-14 lg:h-16 flex items-center justify-center overflow-hidden">
+      <div className="h-8 sm:h-10 lg:h-12 flex items-center justify-center overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentOutcome.text}
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -30, scale: 0.95 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5"
           >
-            <span className="text-foreground/50 text-lg sm:text-xl lg:text-2xl">to</span>
+            <span className="text-foreground/50 text-sm sm:text-base lg:text-lg">to</span>
             <span
-              className={`text-xl sm:text-2xl lg:text-3xl font-semibold bg-gradient-to-r ${currentOutcome.color} bg-clip-text text-transparent`}
+              className={`text-base sm:text-lg lg:text-xl font-semibold bg-gradient-to-r ${currentOutcome.color} bg-clip-text text-transparent`}
             >
               {currentOutcome.text}
             </span>
@@ -88,24 +88,14 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
         </AnimatePresence>
       </div>
 
-      {/* Subtitle */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="text-foreground/60 text-sm sm:text-base lg:text-lg mt-4 max-w-xl mx-auto"
-      >
-        AI-powered relationship coaching that helps you communicate with confidence
-      </motion.p>
-
       {/* Animated dots indicator */}
-      <div className="flex items-center justify-center gap-1.5 mt-6">
+      <div className="flex items-center justify-center gap-1 mt-2">
         {scrollingOutcomes.map((_, index) => (
           <motion.div
             key={index}
-            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+            className={`w-1 h-1 rounded-full transition-all duration-300 ${
               index === currentOutcomeIndex
-                ? 'bg-purple-400 w-4'
+                ? 'bg-purple-400 w-3'
                 : 'bg-foreground/20'
             }`}
           />
@@ -119,7 +109,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
           onClick={onGetStarted}
-          className="mt-8 px-6 py-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+          className="mt-4 px-5 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
         >
           Get Started Free
         </motion.button>

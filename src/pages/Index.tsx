@@ -320,14 +320,14 @@ const Index = () => {
         />
       </div>
 
-      {/* Main content - Responsive layout, single screen height on mobile */}
-      <div className="relative z-10 h-screen lg:min-h-screen flex flex-col px-3 sm:px-6 lg:px-8 py-2 sm:py-4 lg:py-8 max-w-7xl mx-auto overflow-hidden lg:overflow-visible">
+      {/* Main content - Single screen height layout */}
+      <div className="relative z-10 h-screen flex flex-col px-3 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 max-w-7xl mx-auto overflow-hidden">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-1 sm:mb-6 lg:mb-8"
+          className="mb-1 sm:mb-2 lg:mb-3 flex-shrink-0"
         >
           <div className="flex items-center justify-between">
             {/* Mobile hamburger menu */}
@@ -530,12 +530,12 @@ const Index = () => {
         </motion.header>
 
         {/* Hero Section - always visible */}
-        <div data-onboarding="hero">
+        <div data-onboarding="hero" className="flex-shrink-0 mb-2 lg:mb-3">
           <HeroSection />
         </div>
 
         {/* Main Grid - Mobile: Stack (single screen), Desktop: 2 columns */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-2 lg:gap-8 min-h-0">
+        <div className="flex-1 flex flex-col lg:flex-row gap-2 lg:gap-6 min-h-0 overflow-hidden">
           {/* Left Column - Main Widgets (fits in mobile viewport without scrolling) */}
           <div className="flex flex-col gap-1 sm:gap-2 lg:gap-4 lg:w-1/2 xl:w-2/5 flex-1 min-h-0">
             {/* Part 1: Mood Check-in */}
@@ -629,13 +629,13 @@ const Index = () => {
           </div>
 
           {/* Right Column - Dashboard Widgets (hidden on mobile, visible on desktop) */}
-          <div className="hidden lg:flex flex-col gap-3 lg:gap-4 lg:w-1/2 xl:w-3/5">
+          <div className="hidden lg:flex flex-col gap-2 lg:gap-3 lg:w-1/2 xl:w-3/5 min-h-0 overflow-hidden">
             {/* Relationship Graph */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="liquid-glass p-4 sm:p-6 lg:flex-1 min-h-[280px]"
+              className="liquid-glass p-3 sm:p-4 flex-1 min-h-0 flex flex-col"
               data-onboarding="circle-widget"
             >
               <div className="flex items-center justify-between mb-2">
@@ -666,18 +666,19 @@ const Index = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.45 }}
+              className="flex-shrink-0"
             >
               <CircleInsightsWidget compact />
             </motion.section>
 
-            {/* Bottom row - stack on mobile, two columns on larger screens */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Bottom row - two columns on larger screens */}
+            <div className="grid grid-cols-2 gap-3 flex-shrink-0">
               {/* Needs Attention */}
               <motion.section
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                className="liquid-glass p-5"
+                className="liquid-glass p-3 max-h-[180px] overflow-y-auto"
                 data-onboarding="needs-attention"
               >
                 <div className="flex items-center gap-2 mb-2">
@@ -745,26 +746,26 @@ const Index = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
-                className="liquid-glass p-5"
+                className="liquid-glass p-3 max-h-[180px] overflow-y-auto"
               >
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-2">
                   <MessageSquare className="w-4 h-4 text-foreground/60" />
                   <h3 className="text-sm font-medium text-foreground/90">Recent Conversations</h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {recentConversations.map((conv) => (
                     <div
                       key={conv.id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
                     >
-                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">
+                      <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">
                         {conv.name.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground/80 truncate">{conv.name}</p>
-                        <p className="text-xs text-foreground/50 truncate">{conv.topic}</p>
+                        <p className="text-xs font-medium text-foreground/80 truncate">{conv.name}</p>
+                        <p className="text-[10px] text-foreground/50 truncate">{conv.topic}</p>
                       </div>
-                      <span className="text-xs text-foreground/40 whitespace-nowrap">{conv.timeAgo}</span>
+                      <span className="text-[10px] text-foreground/40 whitespace-nowrap">{conv.timeAgo}</span>
                     </div>
                   ))}
                 </div>
@@ -773,17 +774,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Footer - Desktop only */}
-        <footer className="hidden lg:block mt-8 pt-6 border-t border-white/5">
-          <div className="flex items-center justify-between text-xs text-foreground/40">
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-foreground/60 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-foreground/60 transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-foreground/60 transition-colors">Contact</a>
-            </div>
-            <p>&copy; 2026 Attune</p>
-          </div>
-        </footer>
+        {/* Footer - Hidden to maximize screen space, can be shown in profile/settings */}
       </div>
 
       {/* Add Person Modal */}
