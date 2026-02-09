@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import MoodSelector from "@/components/attune/MoodSelector";
@@ -10,10 +10,16 @@ import PersonProfileModal from "@/components/attune/PersonProfileModal";
 import RelationshipGraph from "@/components/attune/RelationshipGraph";
 import { CircleInsightsWidget } from "@/components/attune/CircleInsightsWidget";
 import QuickTalkModal from "@/components/attune/QuickTalkModal";
+import HeroSection from "@/components/landing/HeroSection";
+import WalkthroughOverlay from "@/components/onboarding/WalkthroughOverlay";
+import UpgradePrompt from "@/components/auth/UpgradePrompt";
+import FloatingQuickTalk from "@/components/chat/FloatingQuickTalk";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePeopleWithAutoSeed, usePeopleNeedingAttention } from "@/hooks/usePeople";
 import { useConnections } from "@/hooks/useConnections";
-import { ArrowRight, Sparkles, Clock, AlertCircle, MessageSquare, Menu, X, UserPlus, Briefcase, Heart, Users, Phone, MessageCircle, Copy, Check, LogOut, Mic } from "lucide-react";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { useAnonymousCredits } from "@/hooks/useAnonymousCredits";
+import { ArrowRight, Sparkles, Clock, AlertCircle, MessageSquare, Menu, X, UserPlus, Briefcase, Heart, Users, Phone, MessageCircle, Copy, Check, LogOut, Mic, HelpCircle, LogIn, UserCog } from "lucide-react";
 import { toast } from "sonner";
 import type { Person as DbPerson } from "@/types/database";
 
@@ -88,7 +94,22 @@ const Index = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  // Fetch real data from Supabase
+  // Anonymous credits for users without account
+  const {
+    remainingCredits: anonymousCredits,
+    maxCredits: maxAnonymousCredits,
+    limitReached: anonymousLimitReached,
+  } = useAnonymousCredits();
+
+  // Onboarding walkthrough
+  const {
+    hasSeenOnboarding,
+    isOnboardingActive,
+    startOnboarding,
+    resetOnboarding,
+  } = useOnboarding();
+
+  // Fetch real data from Supabase (only if authenticated)
   const { data: dbPeople = [], isLoading: peopleLoading } = usePeopleWithAutoSeed();
   const { data: peopleNeedingAttention = [] } = usePeopleNeedingAttention(7);
   const { data: connections = [] } = useConnections();
@@ -113,6 +134,34 @@ const Index = () => {
   } | null>(null);
   const [copiedMessage, setCopiedMessage] = useState(false);
   const [showQuickTalkModal, setShowQuickTalkModal] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [showFloatingMic, setShowFloatingMic] = useState(false);
+  const quickTalkButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Track scroll to show/hide floating mic on mobile
+  useEffect(() => {
+    const handleScroll = () => {
+      if (quickTalkButtonRef.current) {
+        const rect = quickTalkButtonRef.current.getBoundingClientRect();
+        // Show floating mic when the main Quick Talk button scrolls out of view
+        setShowFloatingMic(rect.bottom < 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Start onboarding for new anonymous users
+  useEffect(() => {
+    if (!user && hasSeenOnboarding === false) {
+      // Small delay to let the page render first
+      const timer = setTimeout(() => {
+        startOnboarding();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, hasSeenOnboarding, startOnboarding]);
 
   // Convert database people to display format (merge with mock data for demo)
   const people: Person[] = [
@@ -325,20 +374,48 @@ const Index = () => {
               </p>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              {/* Navigation for web */}
-              <nav className="hidden lg:flex items-center gap-6 mr-6">
-                <Link to="/" className="text-sm font-medium text-foreground/90 transition-colors">Today</Link>
-                <Link to="/circle" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Circle</Link>
-                <Link to="/chat" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Talk</Link>
-                <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Me</a>
-                <button
-                  onClick={handleSignOut}
-                  className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors flex items-center gap-1"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </button>
-              </nav>
+              {/* Navigation for web - different for authenticated vs anonymous */}
+              {user ? (
+                <nav className="hidden lg:flex items-center gap-6 mr-6">
+                  <Link to="/" className="text-sm font-medium text-foreground/90 transition-colors">Today</Link>
+                  <Link to="/circle" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Circle</Link>
+                  <Link to="/chat" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Talk</Link>
+                  <a href="#" className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors">Me</a>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors flex items-center gap-1"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </nav>
+              ) : (
+                <nav className="hidden lg:flex items-center gap-4 mr-6">
+                  <button
+                    onClick={resetOnboarding}
+                    className="text-sm font-medium text-foreground/50 hover:text-foreground/70 transition-colors flex items-center gap-1"
+                  >
+                    <HelpCircle className="w-4 h-4" />
+                    Take a Tour
+                  </button>
+                  <span className="text-xs text-foreground/30 bg-foreground/5 px-2 py-1 rounded-full">
+                    {anonymousCredits}/{maxAnonymousCredits} free messages
+                  </span>
+                  <Link
+                    to="/signin"
+                    className="text-sm font-medium text-foreground/70 hover:text-foreground/90 transition-colors flex items-center gap-1"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="text-sm font-medium px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all"
+                  >
+                    Sign Up Free
+                  </Link>
+                </nav>
+              )}
               <ThemeSelector
                 currentTheme={currentTheme}
                 onThemeChange={setCurrentTheme}
@@ -356,24 +433,67 @@ const Index = () => {
                 className="lg:hidden mt-4 overflow-hidden"
               >
                 <div className="liquid-glass rounded-2xl p-4 space-y-2">
-                  <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 bg-white/10 transition-colors">Today</Link>
-                  <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">My Circle</Link>
-                  <Link to="/chat" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Talk to Me</Link>
-                  <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Profile</a>
-                  <div className="border-t border-white/10 pt-2 mt-2">
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors flex items-center gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Sign Out
-                    </button>
-                  </div>
+                  {user ? (
+                    <>
+                      <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 bg-white/10 transition-colors">Today</Link>
+                      <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">My Circle</Link>
+                      <Link to="/chat" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Talk to Me</Link>
+                      <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">Profile</a>
+                      <div className="border-t border-white/10 pt-2 mt-2">
+                        <button
+                          onClick={handleSignOut}
+                          className="w-full py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors flex items-center gap-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between py-2 px-4">
+                        <span className="text-sm text-foreground/60">Free messages</span>
+                        <span className="text-sm font-medium text-purple-400">{anonymousCredits}/{maxAnonymousCredits}</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          resetOnboarding();
+                        }}
+                        className="w-full py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors flex items-center gap-2"
+                      >
+                        <HelpCircle className="w-4 h-4" />
+                        Take a Tour
+                      </button>
+                      <div className="border-t border-white/10 pt-2 mt-2 space-y-2">
+                        <Link
+                          to="/signin"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors flex items-center gap-2"
+                        >
+                          <LogIn className="w-4 h-4" />
+                          Sign In
+                        </Link>
+                        <Link
+                          to="/signup"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block py-3 px-4 rounded-xl text-white bg-gradient-to-r from-purple-500 to-pink-500 transition-colors text-center font-medium"
+                        >
+                          Sign Up Free
+                        </Link>
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.nav>
             )}
           </AnimatePresence>
         </motion.header>
+
+        {/* Hero Section for anonymous users */}
+        {!user && (
+          <HeroSection />
+        )}
 
         {/* Main Grid - Mobile: Stack, Desktop: 2 columns */}
         <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-8">
@@ -385,6 +505,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               className="lg:flex-1"
+              data-onboarding="mood-selector"
             >
               <MoodSelector
                 selectedMood={selectedMood}
@@ -398,6 +519,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="lg:flex-1"
+              data-onboarding="person-search"
             >
               <PersonSearch
                 people={people}
@@ -413,6 +535,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="lg:flex-1"
+              data-onboarding="outcome-selector"
             >
               <OutcomeSelector
                 context={currentContext}
@@ -432,6 +555,11 @@ const Index = () => {
               <button
                 disabled={!isFlowComplete}
                 onClick={() => {
+                  // Check if anonymous user has reached limit
+                  if (!user && anonymousLimitReached) {
+                    setShowUpgradePrompt(true);
+                    return;
+                  }
                   if (isFlowComplete) {
                     const params = new URLSearchParams();
                     if (selectedPerson) params.set('person', selectedPerson.id);
@@ -440,6 +568,7 @@ const Index = () => {
                     navigate(`/chat?${params.toString()}`);
                   }
                 }}
+                data-onboarding="connect-button"
                 className={`w-full py-2 sm:py-3 lg:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-semibold text-white flex items-center justify-center gap-2 sm:gap-3 btn-liquid-primary transition-all text-sm sm:text-base ${
                   isFlowComplete
                     ? currentContext === "work"
@@ -459,7 +588,16 @@ const Index = () => {
 
               {/* Quick Talk Button - Voice-first flow */}
               <button
-                onClick={() => setShowQuickTalkModal(true)}
+                ref={quickTalkButtonRef}
+                onClick={() => {
+                  // Check if anonymous user has reached limit
+                  if (!user && anonymousLimitReached) {
+                    setShowUpgradePrompt(true);
+                    return;
+                  }
+                  setShowQuickTalkModal(true);
+                }}
+                data-onboarding="quick-talk"
                 className="w-full py-2 sm:py-3 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-medium text-white/90 flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:border-purple-500/50 hover:from-purple-500/30 hover:to-pink-500/30 transition-all text-sm sm:text-base group"
               >
                 <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400 group-hover:scale-110 transition-transform" />
@@ -648,6 +786,33 @@ const Index = () => {
         isOpen={showQuickTalkModal}
         onClose={() => setShowQuickTalkModal(false)}
       />
+
+      {/* Onboarding Walkthrough for new users */}
+      {!user && <WalkthroughOverlay />}
+
+      {/* Upgrade Prompt for anonymous users who hit limit */}
+      <UpgradePrompt
+        isOpen={showUpgradePrompt}
+        onClose={() => setShowUpgradePrompt(false)}
+        messagesUsed={maxAnonymousCredits - anonymousCredits}
+        maxMessages={maxAnonymousCredits}
+      />
+
+      {/* Floating Quick Talk button for mobile (shows when scrolled past main button) */}
+      <AnimatePresence>
+        {showFloatingMic && (
+          <FloatingQuickTalk
+            onClick={() => {
+              if (!user && anonymousLimitReached) {
+                setShowUpgradePrompt(true);
+                return;
+              }
+              setShowQuickTalkModal(true);
+            }}
+            isVisible={showFloatingMic && !showQuickTalkModal && !showUpgradePrompt}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Message Draft Modal */}
       <AnimatePresence>

@@ -310,25 +310,34 @@
     box-shadow: 0 12px 32px rgba(52, 211, 153, 0.5);
   }
 
-  /* Floating Orbs Animation */
+  /* Floating Orbs Animation - Slowed down for more subtle effect */
   @keyframes float-orb {
     0%, 100% {
       transform: translate(0, 0) scale(1);
-      opacity: 0.3;
+      opacity: 0.25;
     }
     50% {
-      transform: translate(20px, -20px) scale(1.1);
-      opacity: 0.5;
+      transform: translate(10px, -10px) scale(1.05);
+      opacity: 0.4;
     }
   }
 
   .floating-orb {
-    animation: float-orb 8s ease-in-out infinite;
+    animation: float-orb 15s ease-in-out infinite;
   }
 
   .floating-orb-delayed {
-    animation: float-orb 10s ease-in-out infinite;
-    animation-delay: -3s;
+    animation: float-orb 20s ease-in-out infinite;
+    animation-delay: -5s;
+  }
+
+  /* Respect user's motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .floating-orb,
+    .floating-orb-delayed {
+      animation: none;
+      opacity: 0.3;
+    }
   }
 
   /* Progress Dots */

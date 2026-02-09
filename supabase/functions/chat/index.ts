@@ -321,26 +321,98 @@ serve(async (req) => {
       content: msg.content,
     }));
 
-    // Call Claude API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 2048,
-        system: systemPrompt,
-        messages: claudeMessages,
-      }),
-    });
+    // Call Claude API with retry logic
+    let response: Response | null = null;
+    let lastError: Error | null = null;
+    const maxRetries = 2;
 
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': anthropicApiKey,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model: 'claude-3-haiku-20240307',
+            max_tokens: 2048,
+            system: systemPrompt,
+            messages: claudeMessages,
+          }),
+        });
+
+        // Success or non-retryable error
+        if (response.ok || (response.status >= 400 && response.status < 500 && response.status !== 429)) {
+          break;
+        }
+
+        // Rate limited or server error - retry with backoff
+        if (attempt < maxRetries && (response.status === 429 || response.status >= 500)) {
+          const backoffMs = Math.pow(2, attempt) * 1000;
+          console.log(`Claude API returned ${response.status}, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, backoffMs));
+          continue;
+        }
+      } catch (networkError) {
+        lastError = networkError as Error;
+        console.error(`Network error calling Claude API (attempt ${attempt + 1}):`, networkError);
+        if (attempt < maxRetries) {
+          const backoffMs = Math.pow(2, attempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, backoffMs));
+          continue;
+        }
+      }
+    }
+
+    // Handle network failure
+    if (!response) {
+      console.error('All Claude API attempts failed:', lastError);
+      return new Response(
+        JSON.stringify({
+          error: 'Network error connecting to AI service',
+          code: 'NETWORK_ERROR',
+          retryable: true,
+        }),
+        {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Handle API errors
     if (!response.ok) {
       const errorData = await response.text();
       console.error('Claude API error:', response.status, errorData);
-      throw new Error(`Claude API error: ${response.status} - ${errorData}`);
+
+      // Parse error for more details
+      let errorMessage = `Claude API error: ${response.status}`;
+      let errorCode = 'CLAUDE_API_ERROR';
+      try {
+        const errorJson = JSON.parse(errorData);
+        errorMessage = errorJson.error?.message || errorMessage;
+        if (response.status === 429) {
+          errorCode = 'RATE_LIMITED';
+        } else if (response.status >= 500) {
+          errorCode = 'CLAUDE_SERVER_ERROR';
+        }
+      } catch {
+        // Use raw error text
+      }
+
+      return new Response(
+        JSON.stringify({
+          error: errorMessage,
+          code: errorCode,
+          retryable: response.status === 429 || response.status >= 500,
+        }),
+        {
+          status: response.status >= 500 ? 502 : response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const data = await response.json();

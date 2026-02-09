@@ -204,7 +204,7 @@ export default function Circle() {
                 <ChevronLeft className="w-5 h-5 text-foreground/70" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-foreground/90">My Circle</h1>
+                <h1 className="text-2xl font-bold text-foreground/90">Circle of Influence</h1>
                 <p className="text-sm text-foreground/50">
                   {people.length} {people.length === 1 ? 'person' : 'people'}
                   {connections.length > 0 && (

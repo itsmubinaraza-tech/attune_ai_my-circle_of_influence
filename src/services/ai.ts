@@ -26,6 +26,32 @@ interface ChatResponse {
   };
 }
 
+// Error types for better handling
+export enum ChatErrorType {
+  NOT_AUTHENTICATED = 'NOT_AUTHENTICATED',
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  API_ERROR = 'API_ERROR',
+  RATE_LIMITED = 'RATE_LIMITED',
+  SERVER_ERROR = 'SERVER_ERROR',
+  UNKNOWN = 'UNKNOWN',
+}
+
+export class ChatError extends Error {
+  type: ChatErrorType;
+  statusCode?: number;
+  retryable: boolean;
+
+  constructor(message: string, type: ChatErrorType, statusCode?: number) {
+    super(message);
+    this.name = 'ChatError';
+    this.type = type;
+    this.statusCode = statusCode;
+    this.retryable = type === ChatErrorType.NETWORK_ERROR ||
+                     type === ChatErrorType.RATE_LIMITED ||
+                     (type === ChatErrorType.SERVER_ERROR && statusCode !== undefined && statusCode >= 500);
+  }
+}
+
 // Convert a Person to PersonContext
 export function personToContext(person: Person | null): PersonContext | null {
   if (!person) return null;
@@ -40,42 +66,148 @@ export function personToContext(person: Person | null): PersonContext | null {
   };
 }
 
+// Retry helper with exponential backoff
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries: number = 2
+): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+
+      // Don't retry on auth errors or client errors
+      if (response.status === 401 || response.status === 403) {
+        return response;
+      }
+
+      // Retry on rate limits and server errors
+      if (response.status === 429 || response.status >= 500) {
+        if (attempt < maxRetries) {
+          const backoffMs = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+          console.log(`Retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, backoffMs));
+          continue;
+        }
+      }
+
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      if (attempt < maxRetries) {
+        const backoffMs = Math.pow(2, attempt) * 1000;
+        console.log(`Network error, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+      }
+    }
+  }
+
+  throw lastError || new Error('Request failed after retries');
+}
+
 // Call the Claude AI via Supabase Edge Function
 export async function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
-    throw new Error('Not authenticated');
+    throw new ChatError('Not authenticated', ChatErrorType.NOT_AUTHENTICATED);
   }
 
   // Get the Supabase URL for the edge function
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const functionUrl = `${supabaseUrl}/functions/v1/chat`;
 
-  const response = await fetch(functionUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify({
-      messages: request.messages.map(m => ({
-        role: m.role,
-        content: m.content,
-      })),
-      personContext: request.personContext,
-      mood: request.mood,
-      outcomeGoal: request.outcomeGoal,
-    }),
-  });
+  try {
+    const response = await fetchWithRetry(functionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        messages: request.messages.map(m => ({
+          role: m.role,
+          content: m.content,
+        })),
+        personContext: request.personContext,
+        mood: request.mood,
+        outcomeGoal: request.outcomeGoal,
+      }),
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Edge Function error response:', response.status, errorText);
-    throw new Error(`API error ${response.status}: ${errorText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Edge Function error response:', response.status, errorText);
+
+      // Parse error response if JSON
+      let errorDetails = errorText;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorDetails = errorJson.error || errorJson.message || errorText;
+      } catch {
+        // Not JSON, use raw text
+      }
+
+      // Categorize error type
+      if (response.status === 401 || response.status === 403) {
+        throw new ChatError(
+          'Authentication failed. Please sign in again.',
+          ChatErrorType.NOT_AUTHENTICATED,
+          response.status
+        );
+      } else if (response.status === 429) {
+        throw new ChatError(
+          'Too many requests. Please wait a moment and try again.',
+          ChatErrorType.RATE_LIMITED,
+          response.status
+        );
+      } else if (response.status >= 500) {
+        throw new ChatError(
+          'The AI service is temporarily unavailable. Using backup responses.',
+          ChatErrorType.SERVER_ERROR,
+          response.status
+        );
+      } else {
+        throw new ChatError(
+          `API error: ${errorDetails}`,
+          ChatErrorType.API_ERROR,
+          response.status
+        );
+      }
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof ChatError) {
+      throw error;
+    }
+
+    // Network errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new ChatError(
+        'Network error. Please check your connection.',
+        ChatErrorType.NETWORK_ERROR
+      );
+    }
+
+    // Unknown errors
+    throw new ChatError(
+      (error as Error).message || 'An unexpected error occurred',
+      ChatErrorType.UNKNOWN
+    );
   }
+}
 
-  return response.json();
+// Check if error should trigger fallback response
+export function shouldUseFallback(error: unknown): boolean {
+  if (error instanceof ChatError) {
+    return error.type === ChatErrorType.SERVER_ERROR ||
+           error.type === ChatErrorType.NETWORK_ERROR ||
+           error.type === ChatErrorType.RATE_LIMITED;
+  }
+  return true;
 }
 
 // Fallback responses when API is unavailable - More actionable and practical

@@ -76,7 +76,16 @@ export default function RelationshipGraph({
     }));
   }, [connections]);
 
-  // Initialize nodes with force-directed positions
+  // Orbital ring configuration for Circle of Influence
+  // Each group has its own orbit ring at a specific distance from center
+  const orbitalRings: Record<string, { distance: number; label: string }> = {
+    work: { distance: 70, label: 'Work' },           // Innermost ring
+    family: { distance: 115, label: 'Family' },      // Second ring
+    friends: { distance: 160, label: 'Friends' },    // Third ring
+    acquaintances: { distance: 205, label: 'Outer' }, // Outermost ring
+  };
+
+  // Initialize nodes with orbital positions
   useEffect(() => {
     if (people.length === 0) return;
 
@@ -103,29 +112,20 @@ export default function RelationshipGraph({
       return acc;
     }, {} as Record<string, Person[]>);
 
-    // Position groups in quadrants
-    const groupPositions: Record<string, { angle: number; distance: number }> = {
-      work: { angle: -Math.PI / 2, distance: 120 },      // Top
-      family: { angle: Math.PI * 0.75, distance: 120 },  // Bottom-left
-      friends: { angle: Math.PI * 0.25, distance: 120 }, // Bottom-right
-      acquaintances: { angle: Math.PI, distance: 120 },  // Left
-    };
-
-    const personNodes: Node[] = people.map((person, index) => {
-      const groupInfo = groupPositions[person.group] || { angle: 0, distance: 100 };
+    const personNodes: Node[] = people.map((person) => {
+      const ringInfo = orbitalRings[person.group] || { distance: 150 };
       const groupPeople = grouped[person.group] || [];
       const indexInGroup = groupPeople.findIndex((p) => p.id === person.id);
       const totalInGroup = groupPeople.length;
 
-      // Spread people within their group area
-      const spreadAngle = Math.PI / 3; // 60 degrees spread
-      const angleOffset = totalInGroup > 1
-        ? (indexInGroup / (totalInGroup - 1) - 0.5) * spreadAngle
-        : 0;
-      const distanceVariation = 20 + Math.random() * 40;
+      // Distribute evenly around the ring with some randomness
+      const baseAngle = (2 * Math.PI * indexInGroup) / Math.max(totalInGroup, 1);
+      const angleOffset = (Math.random() - 0.5) * 0.3; // Small random offset
+      const angle = baseAngle + angleOffset;
 
-      const angle = groupInfo.angle + angleOffset;
-      const distance = groupInfo.distance + distanceVariation;
+      // Add slight distance variation to prevent overlap
+      const distanceVariation = (Math.random() - 0.5) * 15;
+      const distance = ringInfo.distance + distanceVariation;
 
       return {
         id: person.id,
@@ -135,7 +135,7 @@ export default function RelationshipGraph({
         y: centerY + Math.sin(angle) * distance,
         vx: 0,
         vy: 0,
-        radius: 20,
+        radius: 18, // Slightly smaller to fit more people
       };
     });
 
@@ -369,6 +369,40 @@ export default function RelationshipGraph({
               </feMerge>
             </filter>
           </defs>
+
+          {/* Orbital rings */}
+          <g className="orbital-rings">
+            {Object.entries(orbitalRings).map(([group, { distance, label }]) => {
+              const color = groupColors[group] || '#888';
+              const hasNodesInRing = nodes.some(n => n.group === group);
+              return (
+                <g key={`ring-${group}`}>
+                  {/* Ring path */}
+                  <circle
+                    cx={dimensions.width / 2}
+                    cy={dimensions.height / 2}
+                    r={distance}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={1}
+                    strokeOpacity={hasNodesInRing ? 0.25 : 0.1}
+                    strokeDasharray="4 6"
+                  />
+                  {/* Ring label */}
+                  <text
+                    x={dimensions.width / 2 + distance + 5}
+                    y={dimensions.height / 2 - 5}
+                    fontSize={9}
+                    fill={color}
+                    opacity={0.5}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    {label}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
 
           {/* Edges */}
           <g className="edges">

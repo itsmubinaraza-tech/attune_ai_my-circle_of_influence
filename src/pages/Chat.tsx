@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, Users, History, Plus, Trash2, Zap } from 'lucide-react';
+import { ArrowLeft, Users, History, Plus, Trash2, Zap, User, ChevronDown, MessageSquare } from 'lucide-react';
 import ChatInterface from '@/components/attune/ChatInterface';
 import CreditsDisplay from '@/components/attune/CreditsDisplay';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSessions, useCreateSession, useSession, useUpdateSession, useDeleteSession } from '@/hooks/useChat';
+import { useSessions, useCreateSession, useSession, useUpdateSession, useDeleteSession, useSessionsForPerson } from '@/hooks/useChat';
 import { usePeople } from '@/hooks/usePeople';
 import { useCreditsInfo, useUseCredits } from '@/hooks/useCredits';
 import { parseMessages, type ChatMessage } from '@/services/chat';
-import { sendChatMessage, personToContext, generateFallbackResponse } from '@/services/ai';
+import { sendChatMessage, personToContext, generateFallbackResponse, shouldUseFallback } from '@/services/ai';
 import type { Person, CoachingSession } from '@/types/database';
 import { toast } from 'sonner';
 
@@ -35,11 +35,20 @@ const Chat = () => {
   const { data: sessions = [], isLoading: sessionsLoading } = useSessions();
   const { data: currentSession, isLoading: sessionLoading } = useSession(currentSessionId);
   const { data: people = [] } = usePeople();
+  const { data: personSessions = [] } = useSessionsForPerson(personIdParam);
   const { remaining: creditsRemaining, isEmpty: noCredits } = useCreditsInfo();
   const createSession = useCreateSession();
   const updateSession = useUpdateSession();
   const deleteSession = useDeleteSession();
   const useCredits = useUseCredits();
+
+  // Filter sessions to show - if person selected, show only their sessions; otherwise show all
+  const displayedSessions = useMemo(() => {
+    if (personIdParam && personSessions.length > 0) {
+      return personSessions;
+    }
+    return sessions;
+  }, [personIdParam, personSessions, sessions]);
 
   // Set selected person from URL param
   useEffect(() => {
@@ -48,6 +57,22 @@ const Chat = () => {
       if (person) setSelectedPerson(person);
     }
   }, [personIdParam, people]);
+
+  // Auto-load most recent session for the person if no session is specified
+  useEffect(() => {
+    if (personIdParam && !sessionIdParam && personSessions.length > 0) {
+      // Only auto-load if the most recent session is from the last 24 hours
+      const mostRecent = personSessions[0];
+      const sessionAge = Date.now() - new Date(mostRecent.created_at).getTime();
+      const oneDayMs = 24 * 60 * 60 * 1000;
+
+      if (sessionAge < oneDayMs) {
+        // Continue the recent conversation
+        setCurrentSessionId(mostRecent.id);
+        setSearchParams({ session: mostRecent.id, person: personIdParam });
+      }
+    }
+  }, [personIdParam, sessionIdParam, personSessions]);
 
   // Load messages from current session
   useEffect(() => {
@@ -293,64 +318,104 @@ const Chat = () => {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden max-w-4xl mx-auto w-full">
         {/* History Sidebar */}
-        {showHistory && (
-          <motion.aside
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="w-72 border-r border-white/10 flex flex-col bg-white/5"
-          >
-            <div className="p-4 border-b border-white/10">
-              <h2 className="text-sm font-medium text-foreground/90">Conversation History</h2>
-              <p className="text-xs text-foreground/50 mt-1">{sessions.length} conversations</p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              {sessionsLoading ? (
-                <div className="p-4 text-center text-foreground/50 text-sm">Loading...</div>
-              ) : sessions.length === 0 ? (
-                <div className="p-4 text-center text-foreground/50 text-sm">No conversations yet</div>
-              ) : (
-                <div className="divide-y divide-white/5">
-                  {sessions.map((session) => {
-                    const person = session.person_id ? people.find(p => p.id === session.person_id) : null;
-                    const isActive = session.id === currentSessionId;
-
-                    return (
-                      <div
-                        key={session.id}
-                        onClick={() => handleSelectSession(session)}
-                        className={`p-3 cursor-pointer transition-colors group ${
-                          isActive ? 'bg-purple-500/10' : 'hover:bg-white/5'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            {person && (
-                              <p className="text-xs text-purple-400 mb-1">About {person.name}</p>
-                            )}
-                            <p className="text-sm text-foreground/80 truncate">
-                              {getSessionPreview(session)}
-                            </p>
-                            <p className="text-xs text-foreground/40 mt-1">
-                              {formatDate(session.created_at)}
-                            </p>
-                          </div>
-                          <button
-                            onClick={(e) => handleDeleteSession(session.id, e)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-foreground/40 hover:text-red-400 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
+        <AnimatePresence>
+          {showHistory && (
+            <motion.aside
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-72 border-r border-white/10 flex flex-col bg-white/5"
+            >
+              <div className="p-4 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-sm font-medium text-foreground/90">
+                      {selectedPerson ? `Conversations with ${selectedPerson.name}` : 'Conversation History'}
+                    </h2>
+                    <p className="text-xs text-foreground/50 mt-1">
+                      {displayedSessions.length} conversation{displayedSessions.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  {selectedPerson && (
+                    <button
+                      onClick={() => {
+                        setSelectedPerson(null);
+                        setSearchParams(currentSessionId ? { session: currentSessionId } : {});
+                      }}
+                      className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      Show all
+                    </button>
+                  )}
                 </div>
-              )}
-            </div>
-          </motion.aside>
-        )}
+
+                {/* Person indicator */}
+                {selectedPerson && (
+                  <div className="mt-3 flex items-center gap-2 p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                    <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <User className="w-4 h-4 text-purple-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground/80 truncate">{selectedPerson.name}</p>
+                      <p className="text-xs text-foreground/50 capitalize">{selectedPerson.group}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                {sessionsLoading ? (
+                  <div className="p-4 text-center text-foreground/50 text-sm">Loading...</div>
+                ) : displayedSessions.length === 0 ? (
+                  <div className="p-4 text-center">
+                    <MessageSquare className="w-8 h-8 text-foreground/20 mx-auto mb-2" />
+                    <p className="text-sm text-foreground/50">
+                      {selectedPerson ? `No conversations with ${selectedPerson.name} yet` : 'No conversations yet'}
+                    </p>
+                    <p className="text-xs text-foreground/40 mt-1">Start chatting to create your first one</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-white/5">
+                    {displayedSessions.map((session) => {
+                      const person = session.person_id ? people.find(p => p.id === session.person_id) : null;
+                      const isActive = session.id === currentSessionId;
+
+                      return (
+                        <div
+                          key={session.id}
+                          onClick={() => handleSelectSession(session)}
+                          className={`p-3 cursor-pointer transition-colors group ${
+                            isActive ? 'bg-purple-500/10' : 'hover:bg-white/5'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              {person && !selectedPerson && (
+                                <p className="text-xs text-purple-400 mb-1">About {person.name}</p>
+                              )}
+                              <p className="text-sm text-foreground/80 truncate">
+                                {getSessionPreview(session)}
+                              </p>
+                              <p className="text-xs text-foreground/40 mt-1">
+                                {formatDate(session.created_at)}
+                              </p>
+                            </div>
+                            <button
+                              onClick={(e) => handleDeleteSession(session.id, e)}
+                              className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-foreground/40 hover:text-red-400 transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
 
         {/* Chat Interface */}
         <div className="flex-1 flex flex-col">
