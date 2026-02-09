@@ -402,10 +402,12 @@ const Index = () => {
                   </Link>
                 </nav>
               )}
-              <ThemeSelector
-                currentTheme={currentTheme}
-                onThemeChange={setCurrentTheme}
-              />
+              <div data-onboarding="theme-selector">
+                <ThemeSelector
+                  currentTheme={currentTheme}
+                  onThemeChange={setCurrentTheme}
+                />
+              </div>
             </div>
           </div>
 
@@ -443,7 +445,7 @@ const Index = () => {
                       <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
                         <span className="flex items-center gap-2">
                           <AlertCircle className="w-4 h-4 text-amber-400" />
-                          Needs Attention
+                          Relationships That Need Attention
                         </span>
                       </Link>
                       <a href="#" className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
@@ -499,7 +501,7 @@ const Index = () => {
                       <Link to="/circle" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl text-foreground/80 hover:bg-white/10 transition-colors">
                         <span className="flex items-center gap-2">
                           <AlertCircle className="w-4 h-4 text-amber-400" />
-                          Needs Attention
+                          Relationships That Need Attention
                         </span>
                       </Link>
                       <div className="border-t border-white/10 pt-2 mt-2 space-y-2">
@@ -527,10 +529,10 @@ const Index = () => {
           </AnimatePresence>
         </motion.header>
 
-        {/* Hero Section for anonymous users */}
-        {!user && (
+        {/* Hero Section - always visible */}
+        <div data-onboarding="hero">
           <HeroSection />
-        )}
+        </div>
 
         {/* Main Grid - Mobile: Stack (single screen), Desktop: 2 columns */}
         <div className="flex-1 flex flex-col lg:flex-row gap-2 lg:gap-8 min-h-0">
@@ -634,6 +636,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               className="liquid-glass p-4 sm:p-6 lg:flex-1 min-h-[280px]"
+              data-onboarding="circle-widget"
             >
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-base sm:text-lg font-medium text-foreground/90">Your Circle of Influence</h3>
@@ -675,10 +678,11 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="liquid-glass p-5"
+                data-onboarding="needs-attention"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="w-4 h-4 text-amber-400" />
-                  <h3 className="text-sm font-medium text-foreground/90">Needs Attention</h3>
+                  <h3 className="text-sm font-medium text-foreground/90">Relationships That Need Attention</h3>
                 </div>
                 {/* Reminder text */}
                 <p className="text-[10px] sm:text-xs text-foreground/50 mb-3 flex items-center gap-1">
@@ -805,8 +809,8 @@ const Index = () => {
         onClose={() => setShowQuickTalkModal(false)}
       />
 
-      {/* Onboarding Walkthrough for new users */}
-      {!user && <WalkthroughOverlay />}
+      {/* Onboarding Walkthrough - available for all users */}
+      <WalkthroughOverlay />
 
       {/* Upgrade Prompt for anonymous users who hit limit */}
       <UpgradePrompt
@@ -816,19 +820,21 @@ const Index = () => {
         maxMessages={maxAnonymousCredits}
       />
 
-      {/* Floating Quick Talk button for mobile (shows when scrolled past main button) */}
+      {/* Floating Quick Talk button */}
       <AnimatePresence>
         {showFloatingMic && (
-          <FloatingQuickTalk
-            onClick={() => {
-              if (!user && anonymousLimitReached) {
-                setShowUpgradePrompt(true);
-                return;
-              }
-              setShowQuickTalkModal(true);
-            }}
-            isVisible={showFloatingMic && !showQuickTalkModal && !showUpgradePrompt}
-          />
+          <div data-onboarding="quick-talk">
+            <FloatingQuickTalk
+              onClick={() => {
+                if (!user && anonymousLimitReached) {
+                  setShowUpgradePrompt(true);
+                  return;
+                }
+                setShowQuickTalkModal(true);
+              }}
+              isVisible={showFloatingMic && !showQuickTalkModal && !showUpgradePrompt}
+            />
+          </div>
         )}
       </AnimatePresence>
 

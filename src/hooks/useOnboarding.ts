@@ -6,45 +6,102 @@ export interface OnboardingStep {
   id: string;
   title: string;
   description: string;
+  benefit: string;
   targetSelector: string;
   position: 'top' | 'bottom' | 'left' | 'right';
+  icon?: string;
 }
 
 export const onboardingSteps: OnboardingStep[] = [
   {
+    id: 'welcome',
+    title: 'Welcome to Attune',
+    description: 'Your personal AI relationship coach that helps you communicate better with the people who matter most.',
+    benefit: 'Get personalized advice for any conversation - whether it\'s with family, friends, or colleagues.',
+    targetSelector: '[data-onboarding="hero"]',
+    position: 'bottom',
+    icon: '👋',
+  },
+  {
     id: 'mood',
-    title: 'How are you feeling?',
-    description: 'Start by selecting your current mood. This helps us tailor advice to your emotional state.',
+    title: 'Step 1: Check in with yourself',
+    description: 'Select your current mood. Are you feeling calm, anxious, frustrated, or hopeful?',
+    benefit: 'Understanding your emotional state helps us give you advice that matches how you\'re feeling right now.',
     targetSelector: '[data-onboarding="mood-selector"]',
     position: 'bottom',
+    icon: '😊',
   },
   {
     id: 'person',
-    title: 'Who do you need to attune to?',
+    title: 'Step 2: Choose who you need to talk to',
     description: 'Search for someone in your circle or add a new person. We\'ll personalize advice based on your relationship.',
+    benefit: 'The more we know about your relationship, the more specific and helpful our guidance becomes.',
     targetSelector: '[data-onboarding="person-search"]',
     position: 'bottom',
+    icon: '👤',
   },
   {
     id: 'outcome',
-    title: 'What outcome are you seeking?',
-    description: 'Choose what you want to achieve from this conversation - whether it\'s resolving conflict, setting boundaries, or deepening connection.',
+    title: 'Step 3: Define your goal',
+    description: 'What do you want to achieve? Resolve a conflict? Set boundaries? Deepen your connection?',
+    benefit: 'Clear goals lead to clear advice. We\'ll guide you toward the outcome you\'re seeking.',
     targetSelector: '[data-onboarding="outcome-selector"]',
     position: 'top',
+    icon: '🎯',
   },
   {
     id: 'connect',
-    title: 'Let\'s work through this together',
-    description: 'When you\'re ready, click here to start a personalized coaching session with actionable advice.',
+    title: 'Step 4: Get personalized guidance',
+    description: 'Click "Let\'s Connect" to start your coaching session with actionable advice tailored to your situation.',
+    benefit: 'Receive specific phrases to use, topics to address, and approaches that work for your relationship.',
     targetSelector: '[data-onboarding="connect-button"]',
     position: 'top',
+    icon: '✨',
+  },
+  {
+    id: 'circle',
+    title: 'Your Circle of Influence',
+    description: 'View all your important relationships organized by group - work, family, friends, and acquaintances.',
+    benefit: 'See relationship health at a glance and identify connections that need nurturing.',
+    targetSelector: '[data-onboarding="circle-widget"]',
+    position: 'left',
+    icon: '🔵',
+  },
+  {
+    id: 'attention',
+    title: 'Relationships That Need Attention',
+    description: 'We track when you last connected with each person and highlight those who might be feeling neglected.',
+    benefit: 'Never lose touch with important people. A quick check-in can strengthen any relationship.',
+    targetSelector: '[data-onboarding="needs-attention"]',
+    position: 'top',
+    icon: '💛',
   },
   {
     id: 'quicktalk',
-    title: 'Or talk to me directly',
-    description: 'Prefer voice? Tap Quick Talk to speak naturally and get instant guidance - no typing required.',
+    title: 'Quick Talk - Voice-First Guidance',
+    description: 'Tap the floating microphone to speak naturally and get instant guidance - no typing required.',
+    benefit: 'Perfect for when you need advice on-the-go or prefer talking over typing.',
     targetSelector: '[data-onboarding="quick-talk"]',
     position: 'top',
+    icon: '🎤',
+  },
+  {
+    id: 'theme',
+    title: 'Make It Yours',
+    description: 'Choose a theme that suits your style - from warm earth tones to calming ocean depths.',
+    benefit: 'A personalized look makes the app feel like home and helps you relax while getting guidance.',
+    targetSelector: '[data-onboarding="theme-selector"]',
+    position: 'bottom',
+    icon: '🎨',
+  },
+  {
+    id: 'complete',
+    title: 'You\'re All Set!',
+    description: 'You now know everything you need to start building stronger relationships with Attune.',
+    benefit: 'Remember: You can always click "Take a Tour" to see this walkthrough again.',
+    targetSelector: '[data-onboarding="hero"]',
+    position: 'bottom',
+    icon: '🎉',
   },
 ];
 
