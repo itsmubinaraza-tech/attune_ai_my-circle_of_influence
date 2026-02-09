@@ -536,14 +536,14 @@ const Index = () => {
 
         {/* Main Grid - Mobile: Stack (single screen), Desktop: 2 columns */}
         <div className="flex-1 flex flex-col lg:flex-row gap-2 lg:gap-6 min-h-0 overflow-hidden">
-          {/* Left Column - Main Widgets (fits in mobile viewport without scrolling) */}
-          <div className="flex flex-col gap-1 sm:gap-2 lg:gap-4 lg:w-1/2 xl:w-2/5 flex-1 min-h-0">
+          {/* Left Column - Main Widgets (fits in viewport) */}
+          <div className="flex flex-col gap-1 sm:gap-2 lg:gap-2 lg:w-1/2 xl:w-2/5 min-h-0">
             {/* Part 1: Mood Check-in */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="lg:flex-1"
+              className="flex-1 min-h-0"
               data-onboarding="mood-selector"
             >
               <MoodSelector
@@ -557,7 +557,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="lg:flex-1"
+              className="flex-1 min-h-0"
               data-onboarding="person-search"
             >
               <PersonSearch
@@ -573,7 +573,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="lg:flex-1"
+              className="flex-1 min-h-0"
               data-onboarding="outcome-selector"
             >
               <OutcomeSelector
@@ -584,12 +584,12 @@ const Index = () => {
               />
             </motion.section>
 
-            {/* Continue Button - Always visible on desktop */}
+            {/* Continue Button - Always visible */}
             <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="space-y-2 sm:space-y-3"
+              className="flex-shrink-0 pt-1"
             >
               <button
                 disabled={!isFlowComplete}
@@ -608,7 +608,7 @@ const Index = () => {
                   }
                 }}
                 data-onboarding="connect-button"
-                className={`w-full py-2 sm:py-3 lg:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-semibold text-white flex items-center justify-center gap-2 sm:gap-3 btn-liquid-primary transition-all text-sm sm:text-base ${
+                className={`w-full py-2 sm:py-2.5 lg:py-3 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-semibold text-white flex items-center justify-center gap-2 sm:gap-3 btn-liquid-primary transition-all text-sm sm:text-base ${
                   isFlowComplete
                     ? currentContext === "work"
                       ? "btn-context-work"
@@ -774,7 +774,15 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Footer - Hidden to maximize screen space, can be shown in profile/settings */}
+        {/* Footer */}
+        <footer className="hidden lg:flex flex-shrink-0 mt-2 pt-2 border-t border-white/5 items-center justify-between text-xs text-foreground/40">
+          <div className="flex gap-4">
+            <a href="#" className="hover:text-foreground/60 transition-colors">Privacy</a>
+            <a href="#" className="hover:text-foreground/60 transition-colors">Terms</a>
+            <a href="#" className="hover:text-foreground/60 transition-colors">Contact</a>
+          </div>
+          <p>&copy; 2026 Attune</p>
+        </footer>
       </div>
 
       {/* Add Person Modal */}
