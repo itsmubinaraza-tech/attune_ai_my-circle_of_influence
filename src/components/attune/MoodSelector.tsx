@@ -142,7 +142,7 @@ const MoodSelector = ({ selectedMood, onMoodSelect }: MoodSelectorProps) => {
         </p>
 
         {/* Centralized Emotion Display - Responsive */}
-        <div className="flex items-center justify-center gap-2 sm:gap-4 relative z-20">
+        <div className="flex items-center justify-center gap-2 sm:gap-4 relative z-20 lg:mb-1.5">
           {/* Previous Arrow */}
           <button
             onClick={handlePrev}
