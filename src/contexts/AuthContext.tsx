@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session, AuthError, Provider } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
+const DEMO_SEEDED_KEY = 'attune_demo_seeded';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -72,6 +74,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // Clear demo seed flag so next user gets fresh demo data
+    localStorage.removeItem(DEMO_SEEDED_KEY);
     const { error } = await supabase.auth.signOut();
     return { error };
   };

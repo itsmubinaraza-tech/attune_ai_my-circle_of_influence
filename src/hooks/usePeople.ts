@@ -147,30 +147,102 @@ export function useSeedDemoData() {
   });
 }
 
+const DEMO_SEEDED_KEY = 'attune_demo_seeded';
+
 /**
  * Hook to check if user has any people and auto-seed demo data
  */
 export function usePeopleWithAutoSeed() {
-  const queryClient = useQueryClient();
-  const seedMutation = useSeedDemoData();
-
   return useQuery({
-    queryKey: PEOPLE_KEY,
+    queryKey: [...PEOPLE_KEY, 'withAutoSeed'],
     queryFn: async () => {
+      // First, fetch existing people
       const people = await peopleService.getPeople();
 
-      // Auto-seed demo data for new users with empty circles
-      if (people.length === 0 && !seedMutation.isPending) {
-        try {
-          const seededPeople = await peopleService.seedDemoData();
-          return seededPeople;
-        } catch (error) {
-          console.error('Failed to seed demo data:', error);
-          return people;
-        }
+      // If user already has people, return them
+      if (people.length > 0) {
+        return people;
       }
 
-      return people;
+      // Check if we've already attempted to seed for this user
+      const hasSeeded = localStorage.getItem(DEMO_SEEDED_KEY);
+
+      if (hasSeeded) {
+        // Already seeded before, don't try again
+        return people;
+      }
+
+      // Attempt to seed demo data for new users
+      try {
+        console.log('Auto-seeding demo data for new user...');
+        const seededPeople = await peopleService.seedDemoData();
+
+        // Mark as seeded so we don't try again
+        localStorage.setItem(DEMO_SEEDED_KEY, 'true');
+
+        console.log(`Successfully seeded ${seededPeople.length} demo contacts`);
+        return seededPeople;
+      } catch (error) {
+        console.error('Failed to seed demo data:', error);
+        // Mark as attempted even on failure to prevent infinite retries
+        localStorage.setItem(DEMO_SEEDED_KEY, 'attempted');
+        return people;
+      }
+    },
+  });
+}
+
+/**
+ * Reset demo seed flag (useful for testing or when user signs out)
+ */
+export function resetDemoSeedFlag() {
+  localStorage.removeItem(DEMO_SEEDED_KEY);
+}
+
+const DEMO_PROMPT_SHOWN_KEY = 'attune_demo_prompt_shown';
+
+/**
+ * Check if demo data prompt has been shown
+ */
+export function hasDemoPromptBeenShown(): boolean {
+  return localStorage.getItem(DEMO_PROMPT_SHOWN_KEY) === 'true';
+}
+
+/**
+ * Mark demo data prompt as shown
+ */
+export function markDemoPromptShown() {
+  localStorage.setItem(DEMO_PROMPT_SHOWN_KEY, 'true');
+}
+
+/**
+ * Hook to delete all demo data (people with "Demo contact" in notes)
+ */
+export function useDeleteDemoData() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      // Get all people
+      const people = await peopleService.getPeople();
+
+      // Find demo people (those with "Demo contact" or "Mockup" in notes or name)
+      const demoPeople = people.filter(
+        (p) =>
+          p.notes?.includes('Demo contact') ||
+          p.notes?.includes('feel free to edit or delete') ||
+          p.name.includes('Mockup')
+      );
+
+      // Delete each demo person
+      for (const person of demoPeople) {
+        await peopleService.deletePerson(person.id);
+      }
+
+      return demoPeople.length;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PEOPLE_KEY });
     },
   });
 }

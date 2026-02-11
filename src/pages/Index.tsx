@@ -15,7 +15,8 @@ import WalkthroughOverlay from "@/components/onboarding/WalkthroughOverlay";
 import UpgradePrompt from "@/components/auth/UpgradePrompt";
 import FloatingQuickTalk from "@/components/chat/FloatingQuickTalk";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePeopleWithAutoSeed, usePeopleNeedingAttention } from "@/hooks/usePeople";
+import { usePeopleWithAutoSeed, usePeopleNeedingAttention, useDeleteDemoData, hasDemoPromptBeenShown, markDemoPromptShown } from "@/hooks/usePeople";
+import DemoDataPrompt from "@/components/onboarding/DemoDataPrompt";
 import { useConnections } from "@/hooks/useConnections";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useAnonymousCredits } from "@/hooks/useAnonymousCredits";
@@ -34,7 +35,7 @@ export interface Person {
   subgroup?: string;
 }
 
-// Mock data for demo - 7 people per group
+// Mock data for demo - 7 people per group (display format)
 const mockPeople: Person[] = [
   // Work colleagues (7)
   { id: "w1", name: "Sarah Chen", group: "work", subgroup: "Manager" },
@@ -69,6 +70,31 @@ const mockPeople: Person[] = [
   { id: "a6", name: "Sam the Trainer", group: "acquaintances", subgroup: "Social" },
   { id: "a7", name: "Tina from Book Club", group: "acquaintances", subgroup: "Social" },
 ];
+
+// Mock data in database format for RelationshipGraph (anonymous users)
+const mockDbPeople: DbPerson[] = mockPeople.map((p) => ({
+  id: p.id,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  user_id: 'demo',
+  name: p.name,
+  nickname: null,
+  photo_url: null,
+  group: p.group,
+  subgroup: p.subgroup || null,
+  role: p.subgroup || null,
+  email: null,
+  phone: null,
+  linkedin_url: null,
+  communication_style: null,
+  motivations: null,
+  values: null,
+  goals: null,
+  notes: 'Demo contact',
+  last_contact: null,
+  relationship_health: Math.floor(Math.random() * 40) + 50, // Random 50-90
+  is_archived: false,
+}));
 
 // Mock data for dashboard widgets (fallback when no real data)
 const mockNeedsAttention = [
@@ -113,6 +139,47 @@ const Index = () => {
   const { data: dbPeople = [], isLoading: peopleLoading } = usePeopleWithAutoSeed();
   const { data: peopleNeedingAttention = [] } = usePeopleNeedingAttention(7);
   const { data: connections = [] } = useConnections();
+  const deleteDemoData = useDeleteDemoData();
+
+  // Demo data prompt state
+  const [showDemoDataPrompt, setShowDemoDataPrompt] = useState(false);
+
+  // Show demo data prompt for new authenticated users who have demo data
+  useEffect(() => {
+    if (user && dbPeople.length > 0 && !peopleLoading && !hasDemoPromptBeenShown()) {
+      // Check if any people are demo data
+      const hasDemoData = dbPeople.some(
+        (p) =>
+          p.notes?.includes('Demo contact') ||
+          p.notes?.includes('feel free to edit or delete') ||
+          p.name.includes('Mockup')
+      );
+      if (hasDemoData) {
+        // Small delay to let the page settle
+        const timer = setTimeout(() => {
+          setShowDemoDataPrompt(true);
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user, dbPeople, peopleLoading]);
+
+  const handleKeepDemoData = () => {
+    markDemoPromptShown();
+    setShowDemoDataPrompt(false);
+    toast.success('Demo data kept! Feel free to edit or delete contacts anytime.');
+  };
+
+  const handleDeleteDemoData = async () => {
+    try {
+      const count = await deleteDemoData.mutateAsync();
+      markDemoPromptShown();
+      setShowDemoDataPrompt(false);
+      toast.success(`Deleted ${count} demo contacts. Your circle is now empty.`);
+    } catch (error) {
+      toast.error('Failed to delete demo data. Please try again.');
+    }
+  };
 
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
@@ -650,7 +717,7 @@ const Index = () => {
 
               {/* Interactive Relationship Graph */}
               <RelationshipGraph
-                people={dbPeople}
+                people={user ? dbPeople : (dbPeople.length > 0 ? dbPeople : mockDbPeople)}
                 connections={connections}
                 selectedPersonId={selectedPerson?.id}
                 onPersonClick={(person) => {
@@ -957,6 +1024,22 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Demo Data Prompt for new users */}
+      <DemoDataPrompt
+        isOpen={showDemoDataPrompt}
+        onKeep={handleKeepDemoData}
+        onDelete={handleDeleteDemoData}
+        onClose={() => {
+          markDemoPromptShown();
+          setShowDemoDataPrompt(false);
+        }}
+        demoCount={dbPeople.filter(p =>
+          p.notes?.includes('Demo contact') ||
+          p.notes?.includes('feel free to edit or delete') ||
+          p.name.includes('Mockup')
+        ).length}
+      />
     </div>
   );
 };
