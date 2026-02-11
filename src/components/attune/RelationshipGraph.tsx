@@ -79,10 +79,10 @@ export default function RelationshipGraph({
   // Orbital ring configuration for Circle of Influence
   // Each group has its own orbit ring at a specific distance from center
   const orbitalRings: Record<string, { distance: number; label: string }> = {
-    work: { distance: 70, label: 'Work' },           // Innermost ring
-    family: { distance: 115, label: 'Family' },      // Second ring
-    friends: { distance: 160, label: 'Friends' },    // Third ring
-    acquaintances: { distance: 205, label: 'Outer' }, // Outermost ring
+    work: { distance: 55, label: 'Work' },           // Innermost ring
+    family: { distance: 90, label: 'Family' },       // Second ring
+    friends: { distance: 125, label: 'Friends' },    // Third ring
+    acquaintances: { distance: 160, label: 'Outer' }, // Outermost ring
   };
 
   // Initialize nodes with orbital positions
@@ -101,7 +101,7 @@ export default function RelationshipGraph({
       y: centerY,
       vx: 0,
       vy: 0,
-      radius: 28,
+      radius: 22,
       fixed: true,
     };
 
@@ -135,7 +135,7 @@ export default function RelationshipGraph({
         y: centerY + Math.sin(angle) * distance,
         vx: 0,
         vy: 0,
-        radius: 18, // Slightly smaller to fit more people
+        radius: 14, // Smaller to fit in constrained widget
       };
     });
 
@@ -324,11 +324,11 @@ export default function RelationshipGraph({
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-2 left-2 z-10 flex flex-wrap gap-2 text-xs">
+      <div className="absolute bottom-2 left-2 z-10 flex flex-wrap gap-1 text-[10px]">
         {Object.entries(groupColors).filter(([k]) => k !== 'you').map(([group, color]) => (
-          <div key={group} className="flex items-center gap-1">
+          <div key={group} className="flex items-center gap-0.5">
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-2 h-2 rounded-full"
               style={{ backgroundColor: color }}
             />
             <span className="text-foreground/50 capitalize">{group}</span>
@@ -339,7 +339,7 @@ export default function RelationshipGraph({
       {/* Graph Container */}
       <div
         ref={containerRef}
-        className="w-full h-[350px] overflow-hidden rounded-xl bg-gradient-to-br from-white/5 to-white/0 border border-white/10 cursor-grab active:cursor-grabbing"
+        className="w-full h-full min-h-[200px] max-h-[260px] overflow-hidden rounded-xl bg-gradient-to-br from-white/5 to-white/0 border border-white/10 cursor-grab active:cursor-grabbing"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -525,8 +525,8 @@ export default function RelationshipGraph({
                   {/* Node label */}
                   <text
                     textAnchor="middle"
-                    dy={isYou ? "0.35em" : node.radius + 14}
-                    fontSize={isYou ? 11 : 10}
+                    dy={isYou ? "0.35em" : node.radius + 10}
+                    fontSize={isYou ? 10 : 9}
                     fontWeight={isYou || isSelected ? 600 : 500}
                     fill={isYou ? 'white' : 'rgba(255,255,255,0.8)'}
                     style={{

@@ -37,8 +37,8 @@ export function CircleInsightsWidget({ compact = false }: CircleInsightsWidgetPr
     return (
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardContent className="p-6 text-center text-white/60">
-          <AlertCircle className="h-8 w-8 mx-auto mb-2 text-red-400" />
-          <p>Unable to load insights</p>
+          <Users className="h-8 w-8 mx-auto mb-2 text-purple-400/60" />
+          <p>Currently you don't have data to show health of your relationships</p>
         </CardContent>
       </Card>
     );

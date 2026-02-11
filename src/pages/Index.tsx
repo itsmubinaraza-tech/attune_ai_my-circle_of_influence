@@ -211,7 +211,7 @@ const Index = () => {
       // Small delay to let the page render first
       const timer = setTimeout(() => {
         startOnboarding();
-      }, 1000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [user, hasSeenOnboarding, startOnboarding]);
@@ -602,9 +602,9 @@ const Index = () => {
         </div>
 
         {/* Main Grid - Mobile: Stack (scrollable), Desktop: 2 columns (fixed height) */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-3 lg:gap-6 min-h-0 overflow-y-auto lg:overflow-y-auto">
+        <div className="flex-1 flex flex-col lg:flex-row gap-3 lg:gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
           {/* Left Column - Main Widgets (fits in viewport) */}
-          <div className="flex flex-col gap-2 sm:gap-3 lg:gap-3 lg:w-1/2 xl:w-2/5 lg:min-h-0 lg:pb-4">
+          <div className="flex flex-col gap-2 sm:gap-3 lg:gap-2 lg:w-1/2 xl:w-2/5 lg:min-h-0 lg:max-h-full lg:overflow-hidden">
             {/* Part 1: Mood Check-in */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
@@ -693,13 +693,13 @@ const Index = () => {
           </div>
 
           {/* Right Column - Dashboard Widgets (visible on all screens) */}
-          <div className="flex flex-col gap-3 lg:gap-3 lg:w-1/2 xl:w-3/5 mt-4 lg:mt-0 lg:min-h-0">
+          <div className="flex flex-col gap-2 lg:gap-2 lg:w-1/2 xl:w-3/5 mt-4 lg:mt-0 lg:min-h-0 lg:max-h-full lg:overflow-hidden">
             {/* Relationship Graph */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="liquid-glass p-3 sm:p-4 min-h-[250px] lg:flex-1 lg:min-h-0 flex flex-col"
+              className="liquid-glass p-3 sm:p-4 min-h-[250px] lg:flex-1 lg:min-h-0 lg:max-h-[280px] flex flex-col"
               data-onboarding="circle-widget"
             >
               <div className="flex items-center justify-between mb-2">
@@ -839,7 +839,7 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <footer className="flex flex-shrink-0 mt-4 pt-3 border-t border-white/5 items-center justify-between text-xs text-foreground/40">
+        <footer className="flex flex-shrink-0 mt-2 pt-2 border-t border-white/5 items-center justify-between text-xs text-foreground/40">
           <div className="flex gap-3 sm:gap-4">
             <Link to="/legal/privacy" className="hover:text-foreground/60 transition-colors">Privacy</Link>
             <Link to="/legal/terms" className="hover:text-foreground/60 transition-colors">Terms</Link>

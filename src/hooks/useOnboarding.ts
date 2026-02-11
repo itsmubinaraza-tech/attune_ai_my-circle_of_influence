@@ -61,7 +61,7 @@ export const onboardingSteps: OnboardingStep[] = [
 ];
 
 export function useOnboarding() {
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(false);
   const [isOnboardingActive, setIsOnboardingActive] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
