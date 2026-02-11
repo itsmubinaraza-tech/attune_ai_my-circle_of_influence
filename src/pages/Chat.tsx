@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSessions, useCreateSession, useSession, useUpdateSession, useDeleteSession, useSessionsForPerson } from '@/hooks/useChat';
 import { usePeople } from '@/hooks/usePeople';
 import { useCreditsInfo, useUseCredits } from '@/hooks/useCredits';
+import { useAnonymousCredits } from '@/hooks/useAnonymousCredits';
 import { parseMessages, type ChatMessage } from '@/services/chat';
 import { sendChatMessage, personToContext, generateFallbackResponse, shouldUseFallback } from '@/services/ai';
 import type { Person, CoachingSession } from '@/types/database';
@@ -31,16 +32,24 @@ const Chat = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
 
-  // Queries
+  // Queries - only fetch if user is logged in
   const { data: sessions = [], isLoading: sessionsLoading } = useSessions();
   const { data: currentSession, isLoading: sessionLoading } = useSession(currentSessionId);
   const { data: people = [] } = usePeople();
   const { data: personSessions = [] } = useSessionsForPerson(personIdParam);
-  const { remaining: creditsRemaining, isEmpty: noCredits } = useCreditsInfo();
+
+  // Credits - use anonymous credits for non-logged in users
+  const { remaining: authCreditsRemaining, isEmpty: authNoCredits } = useCreditsInfo();
+  const { remainingCredits: anonCreditsRemaining, hasCredits: anonHasCredits, useCredit: useAnonCredit, limitReached: anonLimitReached } = useAnonymousCredits();
+  const useCreditsAuth = useUseCredits();
+
+  // Determine which credits to use based on auth state
+  const creditsRemaining = user ? authCreditsRemaining : anonCreditsRemaining;
+  const noCredits = user ? authNoCredits : anonLimitReached;
+
   const createSession = useCreateSession();
   const updateSession = useUpdateSession();
   const deleteSession = useDeleteSession();
-  const useCredits = useUseCredits();
 
   // Filter sessions to show - if person selected, show only their sessions; otherwise show all
   const displayedSessions = useMemo(() => {
@@ -119,7 +128,16 @@ const Chat = () => {
 
     // Check for credits
     if (noCredits) {
-      toast.error('No credits remaining. Your credits will reset next month.');
+      if (user) {
+        toast.error('No credits remaining. Your credits will reset next month.');
+      } else {
+        toast.error('You\'ve used all 10 free messages. Sign up to continue!', {
+          action: {
+            label: 'Sign Up',
+            onClick: () => navigate('/signup'),
+          },
+        });
+      }
       return;
     }
 
@@ -127,7 +145,17 @@ const Chat = () => {
 
     try {
       // Use a credit for this message
-      await useCredits.mutateAsync(1);
+      if (user) {
+        await useCreditsAuth.mutateAsync(1);
+      } else {
+        const credited = useAnonCredit();
+        if (!credited) {
+          toast.error('You\'ve used all 10 free messages. Sign up to continue!');
+          setIsProcessing(false);
+          return;
+        }
+      }
+
       // Create user message
       const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -139,26 +167,28 @@ const Chat = () => {
       const updatedMessages = [...messages, userMessage];
       setMessages(updatedMessages);
 
-      // Create or update session
+      // Only save sessions for logged-in users
       let sessionId = currentSessionId;
 
-      if (!sessionId) {
-        // Create new session
-        const newSession = await createSession.mutateAsync({
-          person_id: selectedPerson?.id || null,
-          messages: updatedMessages,
-          mood: moodParam || null,
-          outcome_goal: outcomeParam || null,
-        });
-        sessionId = newSession.id;
-        setCurrentSessionId(sessionId);
-        setSearchParams({ session: sessionId });
-      } else {
-        // Update existing session
-        await updateSession.mutateAsync({
-          sessionId,
-          updates: { messages: updatedMessages },
-        });
+      if (user) {
+        if (!sessionId) {
+          // Create new session
+          const newSession = await createSession.mutateAsync({
+            person_id: selectedPerson?.id || null,
+            messages: updatedMessages,
+            mood: moodParam || null,
+            outcome_goal: outcomeParam || null,
+          });
+          sessionId = newSession.id;
+          setCurrentSessionId(sessionId);
+          setSearchParams({ session: sessionId });
+        } else {
+          // Update existing session
+          await updateSession.mutateAsync({
+            sessionId,
+            updates: { messages: updatedMessages },
+          });
+        }
       }
 
       // Generate AI response
@@ -178,11 +208,13 @@ const Chat = () => {
       const finalMessages = [...updatedMessages, aiMessage];
       setMessages(finalMessages);
 
-      // Save AI response to session
-      await updateSession.mutateAsync({
-        sessionId,
-        updates: { messages: finalMessages },
-      });
+      // Save AI response to session (only for logged-in users)
+      if (user && sessionId) {
+        await updateSession.mutateAsync({
+          sessionId,
+          updates: { messages: finalMessages },
+        });
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);
@@ -279,47 +311,63 @@ const Chat = () => {
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
               <Zap className={`w-4 h-4 ${noCredits ? 'text-red-400' : creditsRemaining <= 10 ? 'text-amber-400' : 'text-purple-400'}`} />
               <span className={`text-sm font-medium ${noCredits ? 'text-red-400' : creditsRemaining <= 10 ? 'text-amber-400' : 'text-foreground/70'}`}>
-                {creditsRemaining}
+                {creditsRemaining}{!user && '/10 free'}
               </span>
             </div>
 
-            {/* History Button */}
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                showHistory ? 'bg-purple-500/20 text-purple-400' : 'bg-white/5 hover:bg-white/10 text-foreground/70'
-              }`}
-              title="Chat history"
-            >
-              <History className="w-5 h-5" />
-            </button>
+            {/* Sign Up prompt for anonymous users */}
+            {!user && (
+              <Link
+                to="/signup"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30 transition-colors text-sm font-medium"
+              >
+                Sign Up
+              </Link>
+            )}
 
-            {/* New Chat Button */}
-            <button
-              onClick={handleNewChat}
-              className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors text-foreground/70"
-              title="New chat"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
+            {/* History Button - only for logged in users */}
+            {user && (
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  showHistory ? 'bg-purple-500/20 text-purple-400' : 'bg-white/5 hover:bg-white/10 text-foreground/70'
+                }`}
+                title="Chat history"
+              >
+                <History className="w-5 h-5" />
+              </button>
+            )}
 
-            {/* Circle Link */}
-            <Link
-              to="/circle"
-              className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors text-foreground/70"
-              title="My Circle"
-            >
-              <Users className="w-5 h-5" />
-            </Link>
+            {/* New Chat Button - only for logged in users */}
+            {user && (
+              <button
+                onClick={handleNewChat}
+                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors text-foreground/70"
+                title="New chat"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Circle Link - only for logged in users */}
+            {user && (
+              <Link
+                to="/circle"
+                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors text-foreground/70"
+                title="My Circle"
+              >
+                <Users className="w-5 h-5" />
+              </Link>
+            )}
           </div>
         </div>
       </motion.header>
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden max-w-4xl mx-auto w-full">
-        {/* History Sidebar */}
+        {/* History Sidebar - only for logged in users */}
         <AnimatePresence>
-          {showHistory && (
+          {user && showHistory && (
             <motion.aside
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
