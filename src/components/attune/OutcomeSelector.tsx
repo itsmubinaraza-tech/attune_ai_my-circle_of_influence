@@ -138,7 +138,7 @@ const OutcomeSelector = ({ context, selectedOutcome, onOutcomeSelect, currentMoo
 
   return (
     <motion.div
-      className="liquid-glass p-2 sm:p-4 lg:p-6 relative overflow-hidden h-full flex flex-col"
+      className="liquid-glass p-2 sm:p-4 lg:p-6 relative flex flex-col"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -192,13 +192,16 @@ const OutcomeSelector = ({ context, selectedOutcome, onOutcomeSelect, currentMoo
           </button>
 
           {/* Main Outcome Card - Responsive sizing */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             <motion.button
               key={currentOutcome.id}
-              initial={{ opacity: 0, scale: 0.8, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -10 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{
+                duration: 0.2,
+                ease: [0.4, 0, 0.2, 1]
+              }}
               onClick={handleSelect}
               className={`relative flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-2xl sm:rounded-3xl transition-all duration-300 flex-shrink-0 ${
                 isSelected
@@ -289,7 +292,7 @@ const OutcomeSelector = ({ context, selectedOutcome, onOutcomeSelect, currentMoo
         </div>
 
         {/* Outcome Indicators with colors */}
-        <div className="flex justify-center gap-1 sm:gap-1.5 mt-2 sm:mt-4 relative z-20">
+        <div className="flex justify-center gap-1 sm:gap-1.5 mt-2 sm:mt-4 pb-2 relative z-20">
           {outcomes.map((outcome, index) => (
             <button
               key={outcome.id}

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Mail, Lock, User, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Provider } from '@supabase/supabase-js';
+import ConsentModal from '@/components/legal/ConsentModal';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -16,16 +17,26 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [pendingOAuthProvider, setPendingOAuthProvider] = useState<Provider | null>(null);
   const { signUp, signInWithOAuth } = useAuth();
   const navigate = useNavigate();
 
   const handleOAuthSignIn = async (provider: Provider) => {
-    setOauthLoading(provider);
-    const { error } = await signInWithOAuth(provider);
+    // Store provider and show consent modal
+    setPendingOAuthProvider(provider);
+    setShowConsentModal(true);
+  };
+
+  const proceedWithOAuth = async () => {
+    if (!pendingOAuthProvider) return;
+    setOauthLoading(pendingOAuthProvider);
+    const { error } = await signInWithOAuth(pendingOAuthProvider);
     if (error) {
       toast.error(error.message);
       setOauthLoading(null);
     }
+    setPendingOAuthProvider(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,6 +47,11 @@ export default function SignUp() {
       return;
     }
 
+    // Show consent modal before proceeding with signup
+    setShowConsentModal(true);
+  };
+
+  const proceedWithSignup = async () => {
     setLoading(true);
 
     const { error } = await signUp(email, password, fullName);
@@ -46,6 +62,21 @@ export default function SignUp() {
     } else {
       setSuccess(true);
     }
+  };
+
+  const handleConsentAccept = () => {
+    setShowConsentModal(false);
+    if (pendingOAuthProvider) {
+      proceedWithOAuth();
+    } else {
+      proceedWithSignup();
+    }
+  };
+
+  const handleConsentDecline = () => {
+    setShowConsentModal(false);
+    setPendingOAuthProvider(null);
+    toast.error('You must accept the terms to create an account');
   };
 
   if (success) {
@@ -255,11 +286,19 @@ export default function SignUp() {
         {/* Terms */}
         <p className="text-white/40 text-xs text-center mt-6">
           By creating an account, you agree to our{' '}
-          <a href="#" className="text-purple-400 hover:underline">Terms of Service</a>
+          <Link to="/legal/terms" className="text-purple-400 hover:underline">Terms of Service</Link>
           {' '}and{' '}
-          <a href="#" className="text-purple-400 hover:underline">Privacy Policy</a>
+          <Link to="/legal/privacy" className="text-purple-400 hover:underline">Privacy Policy</Link>
         </p>
       </motion.div>
+
+      {/* Consent Modal */}
+      <ConsentModal
+        isOpen={showConsentModal}
+        email={email}
+        onAccept={handleConsentAccept}
+        onDecline={handleConsentDecline}
+      />
     </div>
   );
 }

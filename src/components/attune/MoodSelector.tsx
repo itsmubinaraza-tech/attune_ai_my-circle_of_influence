@@ -92,7 +92,7 @@ const MoodSelector = ({ selectedMood, onMoodSelect }: MoodSelectorProps) => {
   const isSelected = selectedMood === currentMood.value;
 
   return (
-    <div className="liquid-glass p-2 sm:p-4 lg:p-6 relative overflow-hidden h-full flex flex-col">
+    <div className="liquid-glass p-2 sm:p-4 lg:p-6 relative flex flex-col">
       {/* Left side glow - inside widget */}
       <motion.div
         className="absolute left-0 top-0 bottom-0 w-24 rounded-r-full pointer-events-none"
@@ -153,13 +153,16 @@ const MoodSelector = ({ selectedMood, onMoodSelect }: MoodSelectorProps) => {
           </button>
 
           {/* Main Emotion Card - Responsive sizing */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             <motion.button
               key={currentMood.value}
-              initial={{ opacity: 0, scale: 0.8, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -10 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{
+                duration: 0.2,
+                ease: [0.4, 0, 0.2, 1]
+              }}
               onClick={handleSelect}
               className={`relative flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-2xl sm:rounded-3xl transition-all duration-300 flex-shrink-0 ${
                 isSelected
@@ -248,7 +251,7 @@ const MoodSelector = ({ selectedMood, onMoodSelect }: MoodSelectorProps) => {
         </div>
 
         {/* Mood Indicators */}
-        <div className="flex justify-center gap-1 sm:gap-1.5 mt-2 sm:mt-4 relative z-20">
+        <div className="flex justify-center gap-1 sm:gap-1.5 mt-2 sm:mt-4 pb-2 relative z-20">
           {moods.map((mood, index) => (
             <button
               key={mood.value}
