@@ -105,9 +105,10 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=
 - Test on both iOS and Android
 
 ### Authentication
-- Supabase Auth with email/password
+- Supabase Auth with email/password and Google OAuth
 - JWT tokens stored securely (SecureStore on mobile)
 - Row Level Security (RLS) for data access
+- Google OAuth via expo-auth-session and expo-web-browser
 
 ### Credits System
 - 50 free credits per month
@@ -116,29 +117,68 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=
 
 ---
 
-# OAuth Setup (Future)
+# OAuth Setup
 
-To add OAuth (Google, Apple, etc.) for mobile:
+## Google OAuth - IMPLEMENTED
 
-1. **Supabase Dashboard**:
-   - Go to Authentication > Providers
-   - Enable Google/Apple providers
-   - Add redirect URLs:
-     - Web: `https://weattuned.com/*`
-     - Mobile: `exp://` and `attuneai://` (custom scheme)
+### Code Implementation (Complete)
+- `mobile/src/contexts/AuthContext.tsx` - Added `signInWithGoogle()` function
+- `mobile/app/(auth)/sign-in.tsx` - Added Google sign-in button
+- `mobile/app/(auth)/sign-up.tsx` - Added Google sign-in button
+- Uses `expo-auth-session`, `expo-web-browser`, `expo-crypto`
+- Deep link scheme: `attune://auth/callback`
 
-2. **Mobile Implementation**:
-   - Use `expo-auth-session` for OAuth flow
-   - Add to mobile AuthContext when ready
+### External Configuration Required
 
-3. **App Store Requirements**:
-   - Apple Sign-In required if any social login is offered on iOS
-   - Bundle ID for iOS: `com.attuneai.app` (or similar)
-   - Package name for Android: `com.attuneai.app`
+1. **Google Cloud Console** (https://console.cloud.google.com):
+   - Create OAuth 2.0 credentials (Web application type)
+   - Authorized redirect URI: `https://<PROJECT-REF>.supabase.co/auth/v1/callback`
+   - Save Client ID and Client Secret
+
+2. **Supabase Dashboard**:
+   - Go to Authentication > Providers > Google
+   - Enable Google provider
+   - Enter Client ID and Client Secret from Google Cloud
+   - Add redirect URLs in URL Configuration:
+     - `https://weattuned.com/*`
+     - `attune://auth/callback`
+     - `exp://192.168.x.x:8081/*` (for Expo dev)
+
+## Apple Sign-In (Future)
+- Required if any social login is offered on iOS for App Store
+- Bundle ID for iOS: `com.attuneai.app`
+- Package name for Android: `com.attuneai.app`
 
 ---
 
 # Changelog
+
+## [2026-02-09] Google OAuth Implementation
+
+### Mobile Google Sign-In - IMPLEMENTED
+- [x] Install OAuth packages: `expo-auth-session`, `expo-web-browser`, `expo-crypto`
+- [x] Update `AuthContext.tsx` with `signInWithGoogle()` function
+- [x] Add Google sign-in button to `sign-in.tsx`
+- [x] Add Google sign-in button to `sign-up.tsx`
+- [x] Add Google logo SVG component
+- [x] Add `expo-web-browser` plugin to `app.json`
+- [x] Update documentation in CLAUDE.md
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `mobile/src/contexts/AuthContext.tsx` | Added signInWithGoogle, WebBrowser imports |
+| `mobile/app/(auth)/sign-in.tsx` | Added Google button with logo |
+| `mobile/app/(auth)/sign-up.tsx` | Added Google button with logo |
+| `mobile/app.json` | Added expo-web-browser plugin |
+| `mobile/package.json` | Added OAuth dependencies |
+
+### Pending External Setup
+- [ ] Create Google Cloud OAuth credentials
+- [ ] Configure Supabase Google provider with credentials
+- [ ] Add redirect URLs in Supabase
+
+---
 
 ## [2026-02-08] MVP Enhancement - UX, Onboarding & Core Features
 
