@@ -601,10 +601,10 @@ const Index = () => {
           <HeroSection />
         </div>
 
-        {/* Main Grid - Mobile: Stack (scrollable), Desktop: 2 columns */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-3 lg:gap-6 min-h-0 overflow-y-auto lg:overflow-visible">
-          {/* Left Column - Main Widgets */}
-          <div className="flex flex-col gap-2 sm:gap-3 lg:gap-3 lg:w-1/2 xl:w-2/5">
+        {/* Main Grid - Mobile: Stack (scrollable), Desktop: 2 columns (fixed height) */}
+        <div className="flex-1 flex flex-col lg:flex-row gap-3 lg:gap-6 min-h-0 overflow-y-auto lg:overflow-y-auto">
+          {/* Left Column - Main Widgets (fits in viewport) */}
+          <div className="flex flex-col gap-2 sm:gap-3 lg:gap-3 lg:w-1/2 xl:w-2/5 lg:min-h-0 lg:pb-4">
             {/* Part 1: Mood Check-in */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
@@ -693,7 +693,7 @@ const Index = () => {
           </div>
 
           {/* Right Column - Dashboard Widgets (visible on all screens) */}
-          <div className="flex flex-col gap-3 lg:gap-3 lg:w-1/2 xl:w-3/5 mt-4 lg:mt-0">
+          <div className="flex flex-col gap-3 lg:gap-3 lg:w-1/2 xl:w-3/5 mt-4 lg:mt-0 lg:min-h-0">
             {/* Relationship Graph */}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
@@ -839,8 +839,8 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <footer className="hidden lg:flex flex-shrink-0 mt-2 pt-2 border-t border-white/5 items-center justify-between text-xs text-foreground/40">
-          <div className="flex gap-4">
+        <footer className="flex flex-shrink-0 mt-4 pt-3 border-t border-white/5 items-center justify-between text-xs text-foreground/40">
+          <div className="flex gap-3 sm:gap-4">
             <Link to="/legal/privacy" className="hover:text-foreground/60 transition-colors">Privacy</Link>
             <Link to="/legal/terms" className="hover:text-foreground/60 transition-colors">Terms</Link>
             <a href="mailto:contact@weattuned.com" className="hover:text-foreground/60 transition-colors">Contact</a>
