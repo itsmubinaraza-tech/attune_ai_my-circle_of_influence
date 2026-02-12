@@ -101,7 +101,6 @@ const Chat = () => {
       outcome?: string | null;
     }
   ): Promise<string> => {
-    console.log('[Attune] Calling Claude API...');
     try {
       // Try to call Claude API via Edge Function (works for both anonymous and logged-in users)
       const response = await sendChatMessage({
@@ -111,11 +110,9 @@ const Chat = () => {
         outcomeGoal: context.outcome,
       });
 
-      console.log('[Attune] Claude API success!');
       return response.message;
     } catch (error) {
-      console.error('[Attune] Claude API error:', error);
-      console.log('[Attune] Using fallback response');
+      console.warn('Claude API error, using fallback:', error);
       // Fall back to local responses if API fails
       return generateFallbackResponse(
         conversationMessages,

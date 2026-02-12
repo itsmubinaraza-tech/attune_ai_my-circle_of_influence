@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabase';
 import type { Person } from '@/types/database';
 import type { ChatMessage } from './chat';
 
@@ -111,26 +111,20 @@ async function fetchWithRetry(
 export async function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
   const { data: { session } } = await supabase.auth.getSession();
 
-  // Get the Supabase URL for the edge function
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  // Build the function URL
   const functionUrl = `${supabaseUrl}/functions/v1/chat`;
-
-  console.log('[AI Service] Calling:', functionUrl);
-  console.log('[AI Service] Has session:', !!session);
 
   // Build headers - include auth token if logged in, anon key if not
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    'apikey': supabaseAnonKey,
   };
 
   if (session) {
     headers['Authorization'] = `Bearer ${session.access_token}`;
   } else {
-    // For anonymous users, use the anon key
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    console.log('[AI Service] Using anon key (first 20 chars):', anonKey?.substring(0, 20));
-    headers['Authorization'] = `Bearer ${anonKey}`;
-    headers['apikey'] = anonKey;
+    // For anonymous users, use the anon key as bearer token
+    headers['Authorization'] = `Bearer ${supabaseAnonKey}`;
   }
 
   try {
