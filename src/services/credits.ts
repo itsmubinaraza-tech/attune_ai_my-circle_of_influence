@@ -1,13 +1,13 @@
 import { supabase } from '@/lib/supabase';
 import type { UserCredits } from '@/types/database';
 
-const DEFAULT_MONTHLY_CREDITS = 50;
-const CREDITS_PER_MESSAGE = 1;
+export const DEFAULT_MONTHLY_CREDITS = 50;
+export const CREDITS_PER_MESSAGE = 1;
 
 // Get user credits
 export async function getCredits(): Promise<UserCredits | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not authenticated');
+  if (!user) return null; // Return null for anonymous users
 
   const { data, error } = await supabase
     .from('user_credits')

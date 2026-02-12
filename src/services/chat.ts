@@ -27,7 +27,7 @@ export interface CoachingSessionUpdate {
 // Get all coaching sessions for the current user
 export async function getSessions(): Promise<CoachingSession[]> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not authenticated');
+  if (!user) return []; // Return empty for anonymous users
 
   const { data, error } = await supabase
     .from('coaching_sessions')
@@ -42,7 +42,7 @@ export async function getSessions(): Promise<CoachingSession[]> {
 // Get a single coaching session by ID
 export async function getSession(sessionId: string): Promise<CoachingSession | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not authenticated');
+  if (!user) return null; // Return null for anonymous users
 
   const { data, error } = await supabase
     .from('coaching_sessions')
@@ -61,7 +61,7 @@ export async function getSession(sessionId: string): Promise<CoachingSession | n
 // Get sessions for a specific person
 export async function getSessionsForPerson(personId: string): Promise<CoachingSession[]> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not authenticated');
+  if (!user) return []; // Return empty for anonymous users
 
   const { data, error } = await supabase
     .from('coaching_sessions')
@@ -142,7 +142,7 @@ export async function deleteSession(sessionId: string): Promise<void> {
 // Get the most recent session (for continuing a conversation)
 export async function getMostRecentSession(): Promise<CoachingSession | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not authenticated');
+  if (!user) return null; // Return null for anonymous users
 
   const { data, error } = await supabase
     .from('coaching_sessions')
