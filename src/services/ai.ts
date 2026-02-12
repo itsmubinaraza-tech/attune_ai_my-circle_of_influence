@@ -153,6 +153,7 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
     });
 
     console.log('[AI] Response status:', response.status);
+    console.log('[AI] Response ok:', response.ok);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -195,8 +196,11 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
       }
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('[AI] Response success:', { hasMessage: !!data.message, usage: data.usage });
+    return data;
   } catch (error) {
+    console.error('[AI] Caught error:', error);
     if (error instanceof ChatError) {
       throw error;
     }
