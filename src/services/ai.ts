@@ -115,6 +115,9 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const functionUrl = `${supabaseUrl}/functions/v1/chat`;
 
+  console.log('[AI Service] Calling:', functionUrl);
+  console.log('[AI Service] Has session:', !!session);
+
   // Build headers - include auth token if logged in, anon key if not
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -125,6 +128,7 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
   } else {
     // For anonymous users, use the anon key
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    console.log('[AI Service] Using anon key (first 20 chars):', anonKey?.substring(0, 20));
     headers['Authorization'] = `Bearer ${anonKey}`;
     headers['apikey'] = anonKey;
   }
