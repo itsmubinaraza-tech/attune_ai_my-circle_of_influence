@@ -101,17 +101,8 @@ const Chat = () => {
       outcome?: string | null;
     }
   ): Promise<string> => {
-    // For anonymous users, use fallback responses directly (no API auth)
-    if (!user) {
-      return generateFallbackResponse(
-        conversationMessages,
-        context.person || null,
-        context.mood || null
-      );
-    }
-
     try {
-      // Try to call Claude API via Edge Function (authenticated users only)
+      // Try to call Claude API via Edge Function (works for both anonymous and logged-in users)
       const response = await sendChatMessage({
         messages: conversationMessages,
         personContext: personToContext(context.person || null),

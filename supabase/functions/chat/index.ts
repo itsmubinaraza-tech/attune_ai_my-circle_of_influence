@@ -95,28 +95,22 @@ serve(async (req) => {
   }
 
   try {
-    // Get auth header
+    // Check for auth header (optional - anonymous users allowed)
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    let userId = 'anonymous';
 
-    // Verify user
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    if (authHeader) {
+      // Verify user if auth header provided
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { global: { headers: { Authorization: authHeader } } }
       );
+
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        userId = user.id;
+      }
     }
 
     // Parse request
@@ -150,7 +144,7 @@ serve(async (req) => {
       content: msg.content,
     }));
 
-    console.log(`Processing chat for user ${user.id}, ${claudeMessages.length} messages`);
+    console.log(`Processing chat for user ${userId}, ${claudeMessages.length} messages`);
 
     // Call Claude API with timeout and retry
     let response: Response | null = null;
