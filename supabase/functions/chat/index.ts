@@ -9,6 +9,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limiting: Track requests per IP (in-memory, resets on cold start)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 20; // Max requests per window
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
+  }
+
+  if (record.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  record.count++;
+  return { allowed: true, remaining: RATE_LIMIT_MAX - record.count };
+}
+
+// Content validation: Block obviously malicious requests
+function validateContent(messages: Array<{ content: string }>): boolean {
+  for (const msg of messages) {
+    // Block extremely long messages (potential abuse)
+    if (msg.content.length > 10000) return false;
+
+    // Block requests that look like prompt injection attempts
+    const lowerContent = msg.content.toLowerCase();
+    if (lowerContent.includes('ignore previous instructions') ||
+        lowerContent.includes('ignore all instructions') ||
+        lowerContent.includes('disregard your instructions')) {
+      return false;
+    }
+  }
+  return true;
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -95,6 +134,29 @@ serve(async (req) => {
   }
 
   try {
+    // Get client IP for rate limiting
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                     req.headers.get('x-real-ip') ||
+                     'unknown';
+
+    // Check rate limit
+    const { allowed, remaining } = checkRateLimit(clientIP);
+    if (!allowed) {
+      console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please wait a moment.', code: 'RATE_LIMITED' }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'X-RateLimit-Remaining': '0',
+            'Retry-After': '60',
+          },
+        }
+      );
+    }
+
     // Check for auth header (optional - anonymous users allowed)
     const authHeader = req.headers.get('Authorization');
     let userId = 'anonymous';
@@ -120,6 +182,23 @@ serve(async (req) => {
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(
         JSON.stringify({ error: 'Messages array is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate content for abuse
+    if (!validateContent(messages)) {
+      console.warn(`Content validation failed for user: ${userId}, IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request content', code: 'VALIDATION_ERROR' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Limit number of messages to prevent context abuse
+    if (messages.length > 20) {
+      return new Response(
+        JSON.stringify({ error: 'Too many messages in conversation', code: 'VALIDATION_ERROR' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
