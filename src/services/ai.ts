@@ -114,6 +114,16 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
   // Build the function URL
   const functionUrl = `${supabaseUrl}/functions/v1/chat`;
 
+  // Debug logging
+  console.log('[AI] URL:', functionUrl);
+  console.log('[AI] Has supabaseAnonKey:', !!supabaseAnonKey);
+  console.log('[AI] Has session:', !!session);
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[AI] Missing config:', { supabaseUrl, hasAnonKey: !!supabaseAnonKey });
+    throw new ChatError('Missing Supabase configuration', ChatErrorType.API_ERROR);
+  }
+
   // Build headers - include auth token if logged in, anon key if not
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -142,9 +152,11 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
       }),
     });
 
+    console.log('[AI] Response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Edge Function error response:', response.status, errorText);
+      console.error('[AI] Edge Function error:', response.status, errorText);
 
       // Parse error response if JSON
       let errorDetails = errorText;
