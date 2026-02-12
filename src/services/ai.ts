@@ -124,17 +124,18 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
     throw new ChatError('Missing Supabase configuration', ChatErrorType.API_ERROR);
   }
 
-  // Build headers - include auth token if logged in, anon key if not
+  // Build headers - always use anon key for edge function authorization
+  // The edge function allows anonymous access, so we use anon key to avoid
+  // issues with expired/invalid session tokens
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'apikey': supabaseAnonKey,
+    'Authorization': `Bearer ${supabaseAnonKey}`,
   };
 
+  // Pass user token in custom header if logged in (for user identification in function)
   if (session) {
-    headers['Authorization'] = `Bearer ${session.access_token}`;
-  } else {
-    // For anonymous users, use the anon key as bearer token
-    headers['Authorization'] = `Bearer ${supabaseAnonKey}`;
+    headers['x-user-token'] = session.access_token;
   }
 
   try {

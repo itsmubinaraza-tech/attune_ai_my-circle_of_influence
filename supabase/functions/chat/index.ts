@@ -157,21 +157,27 @@ serve(async (req) => {
       );
     }
 
-    // Check for auth header (optional - anonymous users allowed)
-    const authHeader = req.headers.get('Authorization');
+    // Check for user token (optional - anonymous users allowed)
+    // User token is passed in x-user-token header to avoid issues with session JWT validation
+    const userToken = req.headers.get('x-user-token');
     let userId = 'anonymous';
 
-    if (authHeader) {
-      // Verify user if auth header provided
-      const supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-        { global: { headers: { Authorization: authHeader } } }
-      );
+    if (userToken) {
+      // Verify user if token provided
+      try {
+        const supabaseClient = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+          { global: { headers: { Authorization: `Bearer ${userToken}` } } }
+        );
 
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      if (user) {
-        userId = user.id;
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (user) {
+          userId = user.id;
+        }
+      } catch (e) {
+        // Token validation failed, continue as anonymous
+        console.warn('User token validation failed:', e);
       }
     }
 
