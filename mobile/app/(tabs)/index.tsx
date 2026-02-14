@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Image } from 'react-native';
+import { View, Text, ScrollView, Pressable, Image, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Mic, ArrowRight } from 'lucide-react-native';
-import * as Haptics from 'expo-haptics';
+import { Mic, ArrowRight, Zap, AlertCircle } from 'lucide-react-native';
+import { triggerHaptic } from '../../src/utils/haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { useAuth } from '../../src/contexts/AuthContext';
+import { useCreditsInfo } from '../../src/hooks/useCredits';
+import { usePeopleNeedingAttention } from '../../src/hooks/usePeople';
 
 type Mood = 'calm' | 'anxious' | 'frustrated' | 'hopeful' | 'tired' | 'motivated' | 'uncertain' | 'confident';
 
@@ -30,28 +33,41 @@ const outcomes = [
 ];
 
 export default function HomeScreen() {
+  const { user } = useAuth();
+  const { remaining, total, isLow, isEmpty, isLoading: creditsLoading } = useCreditsInfo();
+  const { data: needsAttention, isLoading: attentionLoading } = usePeopleNeedingAttention(7);
+
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
 
   const handleMoodSelect = (mood: Mood) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.light();
     setSelectedMood(mood);
   };
 
   const handleOutcomeSelect = (outcome: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.light();
     setSelectedOutcome(outcome);
   };
 
   const handleQuickTalk = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic.medium();
     // TODO: Open Quick Talk modal
   };
 
   const handleConnect = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.push('/chat');
+    triggerHaptic.success();
+    router.push({
+      pathname: '/chat',
+      params: {
+        mood: selectedMood || '',
+        outcome: selectedOutcome || ''
+      },
+    });
   };
+
+  // Get user's first name for greeting
+  const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
 
   return (
     <LinearGradient
@@ -67,9 +83,49 @@ export default function HomeScreen() {
                 source={require('../../assets/icon.png')}
                 className="w-10 h-10 rounded-xl"
               />
-              <Text className="text-2xl font-bold text-white">Attune</Text>
+              <View>
+                <Text className="text-2xl font-bold text-white">Hey, {firstName}</Text>
+                <Text className="text-white/50 text-sm">Let's strengthen your connections</Text>
+              </View>
             </View>
+            {/* Credits Badge */}
+            <Pressable
+              onPress={() => router.push('/profile')}
+              className={`flex-row items-center gap-2 px-3 py-1.5 rounded-full ${
+                isEmpty ? 'bg-red-500/20' : isLow ? 'bg-amber-500/20' : 'bg-white/5'
+              }`}
+            >
+              <Zap size={16} color={isEmpty ? '#EF4444' : isLow ? '#F59E0B' : '#8B5CF6'} />
+              {creditsLoading ? (
+                <ActivityIndicator size="small" color="#8B5CF6" />
+              ) : (
+                <Text className={`text-sm ${isEmpty ? 'text-red-400' : isLow ? 'text-amber-400' : 'text-white/70'}`}>
+                  {remaining}
+                </Text>
+              )}
+            </Pressable>
           </Animated.View>
+
+          {/* Needs Attention Alert */}
+          {!attentionLoading && needsAttention && needsAttention.length > 0 && (
+            <Animated.View entering={FadeInDown.delay(150)} className="mb-6">
+              <Pressable
+                onPress={() => router.push('/circle')}
+                className="flex-row items-center p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl"
+              >
+                <AlertCircle size={20} color="#F59E0B" />
+                <View className="flex-1 ml-3">
+                  <Text className="text-white font-medium">
+                    {needsAttention.length} {needsAttention.length === 1 ? 'person needs' : 'people need'} your attention
+                  </Text>
+                  <Text className="text-white/50 text-sm">
+                    {needsAttention[0]?.name}{needsAttention.length > 1 ? ` and ${needsAttention.length - 1} more` : ''}
+                  </Text>
+                </View>
+                <ArrowRight size={16} color="#F59E0B" />
+              </Pressable>
+            </Animated.View>
+          )}
 
           {/* Mood Selector */}
           <Animated.View entering={FadeInDown.delay(200)} className="mb-6">
@@ -131,16 +187,19 @@ export default function HomeScreen() {
             {/* Let's Connect Button */}
             <Pressable
               onPress={handleConnect}
+              disabled={isEmpty}
               className="overflow-hidden rounded-xl"
             >
               <LinearGradient
-                colors={['#8B5CF6', '#D946EF']}
+                colors={isEmpty ? ['#4B5563', '#374151'] : ['#8B5CF6', '#D946EF']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 className="flex-row items-center justify-center gap-2 py-4"
               >
-                <Text className="text-white font-semibold text-lg">Let's Connect</Text>
-                <ArrowRight size={20} color="white" />
+                <Text className="text-white font-semibold text-lg">
+                  {isEmpty ? 'No Credits Left' : "Let's Connect"}
+                </Text>
+                {!isEmpty && <ArrowRight size={20} color="white" />}
               </LinearGradient>
             </Pressable>
 

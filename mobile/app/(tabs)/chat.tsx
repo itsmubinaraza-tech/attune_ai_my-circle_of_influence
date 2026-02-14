@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,21 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Send, Mic, Zap } from 'lucide-react-native';
-import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { useLocalSearchParams } from 'expo-router';
+import { Send, Mic, Zap, AlertCircle } from 'lucide-react-native';
+import { triggerHaptic } from '../../src/utils/haptics';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import { useCreditsInfo, useUseCredits } from '../../src/hooks/useCredits';
+import { useCreateSession, useUpdateSession } from '../../src/hooks/useChat';
+import { sendChatMessage, generateFallbackResponse } from '../../src/services/ai';
+import type { ChatMessage } from '../../src/services/chat';
 
-interface Message {
+interface DisplayMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -22,7 +29,13 @@ interface Message {
 }
 
 export default function ChatScreen() {
-  const [messages, setMessages] = useState<Message[]>([
+  const params = useLocalSearchParams<{ mood?: string; outcome?: string; personId?: string }>();
+  const { remaining, isEmpty, isLoading: creditsLoading } = useCreditsInfo();
+  const useCredits = useUseCredits();
+  const createSession = useCreateSession();
+  const updateSession = useUpdateSession();
+
+  const [messages, setMessages] = useState<DisplayMessage[]>([
     {
       id: '1',
       role: 'assistant',
@@ -32,44 +45,128 @@ export default function ChatScreen() {
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
 
+  // Create session on first message
+  useEffect(() => {
+    const initSession = async () => {
+      if (messages.length === 1 && !sessionId) {
+        try {
+          const session = await createSession.mutateAsync({
+            messages: [],
+            mood: params.mood || null,
+            outcome_goal: params.outcome || null,
+            person_id: params.personId || null,
+          });
+          setSessionId(session.id);
+        } catch (error) {
+          console.error('Failed to create session:', error);
+        }
+      }
+    };
+    initSession();
+  }, []);
+
   const handleSend = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isLoading) return;
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Check credits
+    if (isEmpty) {
+      Alert.alert(
+        'No Credits',
+        'You have no credits remaining. Credits reset at the beginning of each month.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
 
-    const userMessage: Message = {
+    triggerHaptic.light();
+
+    const userMessage: DisplayMessage = {
       id: Date.now().toString(),
       role: 'user',
       content: inputText.trim(),
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInputText('');
     setIsLoading(true);
 
-    // Simulate AI response (TODO: Connect to real API)
-    setTimeout(() => {
-      const aiResponse: Message = {
+    try {
+      // Use a credit
+      await useCredits.mutateAsync(1);
+
+      // Convert messages to API format
+      const apiMessages: ChatMessage[] = newMessages
+        .filter(m => m.role !== 'assistant' || m.id !== '1') // Exclude initial greeting
+        .map(m => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp.toISOString(),
+        }));
+
+      // Try to send to AI
+      let responseContent: string;
+      try {
+        const response = await sendChatMessage({
+          messages: apiMessages,
+          mood: params.mood || null,
+          outcomeGoal: params.outcome || null,
+          personContext: null, // TODO: Add person context if personId is provided
+        });
+        responseContent = response.message;
+      } catch (aiError) {
+        // Fallback to local response
+        console.warn('AI API error, using fallback:', aiError);
+        responseContent = generateFallbackResponse(apiMessages, null, params.mood || null);
+      }
+
+      const aiResponse: DisplayMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `I understand you're thinking about this. Let me help you with some specific guidance:\n\n**What to Say:**\nStart with something like: "I've been meaning to talk to you about..."\n\n**How to Say It:**\nUse a warm, open tone. Maintain eye contact and relaxed body language.\n\n**What to Expect:**\nThey may need a moment to process. Be patient and listen actively.`,
+        content: responseContent,
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, aiResponse]);
+
+      const updatedMessages = [...newMessages, aiResponse];
+      setMessages(updatedMessages);
+
+      // Update session in database
+      if (sessionId) {
+        const sessionMessages: ChatMessage[] = updatedMessages.map(m => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp.toISOString(),
+        }));
+        await updateSession.mutateAsync({
+          sessionId,
+          updates: { messages: sessionMessages },
+        });
+      }
+
+      triggerHaptic.success();
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      triggerHaptic.error();
+      Alert.alert('Error', 'Failed to send message. Please try again.');
+      // Remove the user message on failure
+      setMessages(messages);
+    } finally {
       setIsLoading(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }, 1500);
+    }
   };
 
   const handleVoiceInput = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // TODO: Implement voice input
+    triggerHaptic.medium();
+    Alert.alert('Coming Soon', 'Voice input will be available in a future update.');
   };
 
-  const renderMessage = ({ item, index }: { item: Message; index: number }) => {
+  const renderMessage = ({ item, index }: { item: DisplayMessage; index: number }) => {
     const isUser = item.role === 'user';
 
     return (
@@ -99,11 +196,29 @@ export default function ChatScreen() {
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 border-b border-white/10">
           <Text className="text-xl font-bold text-white">Talk to Me</Text>
-          <View className="flex-row items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full">
-            <Zap size={16} color="#8B5CF6" />
-            <Text className="text-white/70 text-sm">45</Text>
+          <View className={`flex-row items-center gap-2 px-3 py-1.5 rounded-full ${
+            isEmpty ? 'bg-red-500/20' : 'bg-white/5'
+          }`}>
+            <Zap size={16} color={isEmpty ? '#EF4444' : '#8B5CF6'} />
+            {creditsLoading ? (
+              <ActivityIndicator size="small" color="#8B5CF6" />
+            ) : (
+              <Text className={`text-sm ${isEmpty ? 'text-red-400' : 'text-white/70'}`}>
+                {remaining}
+              </Text>
+            )}
           </View>
         </View>
+
+        {/* No Credits Warning */}
+        {isEmpty && (
+          <View className="mx-4 mt-2 flex-row items-center p-3 bg-red-500/20 border border-red-500/30 rounded-xl">
+            <AlertCircle size={20} color="#EF4444" />
+            <Text className="text-red-400 ml-2 flex-1">
+              No credits remaining. Credits reset monthly.
+            </Text>
+          </View>
+        )}
 
         {/* Messages */}
         <FlatList
@@ -118,7 +233,10 @@ export default function ChatScreen() {
             isLoading ? (
               <View className="items-start mb-4">
                 <View className="bg-white/10 px-4 py-3 rounded-2xl rounded-bl-md">
-                  <Text className="text-white/50">Thinking...</Text>
+                  <View className="flex-row items-center gap-2">
+                    <ActivityIndicator size="small" color="#8B5CF6" />
+                    <Text className="text-white/50">Thinking...</Text>
+                  </View>
                 </View>
               </View>
             ) : null
@@ -136,10 +254,11 @@ export default function ChatScreen() {
                 <TextInput
                   value={inputText}
                   onChangeText={setInputText}
-                  placeholder="Type your message..."
+                  placeholder={isEmpty ? "No credits remaining..." : "Type your message..."}
                   placeholderTextColor="rgba(255,255,255,0.5)"
                   multiline
                   maxLength={500}
+                  editable={!isEmpty}
                   className="flex-1 text-white max-h-24"
                   style={{ paddingTop: 8, paddingBottom: 8 }}
                 />
@@ -152,14 +271,14 @@ export default function ChatScreen() {
               </View>
               <Pressable
                 onPress={handleSend}
-                disabled={!inputText.trim() || isLoading}
+                disabled={!inputText.trim() || isLoading || isEmpty}
                 className={`w-12 h-12 rounded-full items-center justify-center ${
-                  inputText.trim() && !isLoading ? 'bg-primary-500' : 'bg-white/10'
+                  inputText.trim() && !isLoading && !isEmpty ? 'bg-primary-500' : 'bg-white/10'
                 }`}
               >
                 <Send
                   size={20}
-                  color={inputText.trim() && !isLoading ? 'white' : 'rgba(255,255,255,0.3)'}
+                  color={inputText.trim() && !isLoading && !isEmpty ? 'white' : 'rgba(255,255,255,0.3)'}
                 />
               </Pressable>
             </View>

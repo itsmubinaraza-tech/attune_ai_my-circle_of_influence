@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Switch } from 'react-native';
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -11,8 +11,11 @@ import {
   Zap,
   Crown,
 } from 'lucide-react-native';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic } from '../../src/utils/haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { router } from 'expo-router';
+import { useAuth } from '../../src/contexts/AuthContext';
+import { useCreditsInfo } from '../../src/hooks/useCredits';
 
 interface SettingItemProps {
   icon: React.ReactNode;
@@ -26,7 +29,7 @@ function SettingItem({ icon, label, value, onPress, showChevron = true }: Settin
   return (
     <Pressable
       onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        triggerHaptic.light();
         onPress?.();
       }}
       className="flex-row items-center py-4 border-b border-white/5"
@@ -42,10 +45,43 @@ function SettingItem({ icon, label, value, onPress, showChevron = true }: Settin
 }
 
 export default function ProfileScreen() {
-  const handleSignOut = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    // TODO: Implement sign out
+  const { user, signOut, loading } = useAuth();
+  const { remaining, total, percentage, daysUntilReset, isLow, isEmpty, isLoading: creditsLoading } = useCreditsInfo();
+
+  const handleSignOut = async () => {
+    triggerHaptic.warning();
+
+    const doSignOut = async () => {
+      const { error } = await signOut();
+      if (error) {
+        if (Platform.OS === 'web') {
+          window.alert(error.message);
+        } else {
+          Alert.alert('Error', error.message);
+        }
+      } else {
+        router.replace('/(auth)/sign-in');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to sign out?')) {
+        await doSignOut();
+      }
+    } else {
+      Alert.alert(
+        'Sign Out',
+        'Are you sure you want to sign out?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign Out', style: 'destructive', onPress: doSignOut },
+        ]
+      );
+    }
   };
+
+  const userName = user?.user_metadata?.full_name || 'User';
+  const userEmail = user?.email || '';
 
   return (
     <LinearGradient
@@ -65,8 +101,8 @@ export default function ProfileScreen() {
                   <User size={32} color="#8B5CF6" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-semibold text-lg">User Name</Text>
-                  <Text className="text-white/50">user@email.com</Text>
+                  <Text className="text-white font-semibold text-lg">{userName}</Text>
+                  <Text className="text-white/50">{userEmail}</Text>
                 </View>
                 <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
               </Pressable>
@@ -76,7 +112,7 @@ export default function ProfileScreen() {
           {/* Credits Card */}
           <Animated.View entering={FadeInDown.delay(200)} className="px-4 mb-6">
             <LinearGradient
-              colors={['#8B5CF6', '#D946EF']}
+              colors={isEmpty ? ['#EF4444', '#DC2626'] : isLow ? ['#F59E0B', '#D97706'] : ['#8B5CF6', '#D946EF']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               className="p-4 rounded-2xl"
@@ -84,16 +120,28 @@ export default function ProfileScreen() {
               <View className="flex-row items-center justify-between">
                 <View>
                   <Text className="text-white/80 text-sm">Monthly Credits</Text>
-                  <View className="flex-row items-baseline gap-1">
-                    <Text className="text-white font-bold text-3xl">45</Text>
-                    <Text className="text-white/60">/ 50</Text>
-                  </View>
+                  {creditsLoading ? (
+                    <ActivityIndicator size="small" color="white" className="mt-2" />
+                  ) : (
+                    <View className="flex-row items-baseline gap-1">
+                      <Text className="text-white font-bold text-3xl">{remaining}</Text>
+                      <Text className="text-white/60">/ {total}</Text>
+                    </View>
+                  )}
                 </View>
                 <Zap size={40} color="white" />
               </View>
               <View className="mt-3 h-2 bg-white/20 rounded-full overflow-hidden">
-                <View className="h-full bg-white rounded-full" style={{ width: '90%' }} />
+                <View
+                  className="h-full bg-white rounded-full"
+                  style={{ width: `${percentage}%` }}
+                />
               </View>
+              {daysUntilReset !== null && (
+                <Text className="text-white/60 text-sm mt-2">
+                  Resets in {daysUntilReset} {daysUntilReset === 1 ? 'day' : 'days'}
+                </Text>
+              )}
             </LinearGradient>
           </Animated.View>
 
@@ -132,10 +180,17 @@ export default function ProfileScreen() {
 
             <Pressable
               onPress={handleSignOut}
+              disabled={loading}
               className="flex-row items-center justify-center py-4 bg-red-500/10 border border-red-500/30 rounded-2xl mb-8"
             >
-              <LogOut size={20} color="#EF4444" />
-              <Text className="text-red-400 font-semibold ml-2">Sign Out</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#EF4444" />
+              ) : (
+                <>
+                  <LogOut size={20} color="#EF4444" />
+                  <Text className="text-red-400 font-semibold ml-2">Sign Out</Text>
+                </>
+              )}
             </Pressable>
 
             <Text className="text-center text-white/30 text-sm mb-8">

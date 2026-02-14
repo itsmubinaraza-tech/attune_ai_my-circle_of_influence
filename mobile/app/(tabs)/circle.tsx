@@ -1,31 +1,15 @@
 import { useState } from 'react';
-import { View, Text, FlatList, Pressable, TextInput } from 'react-native';
+import { View, Text, FlatList, Pressable, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Search, Plus, Briefcase, Heart, Users, User } from 'lucide-react-native';
-import * as Haptics from 'expo-haptics';
+import { Search, Plus, Briefcase, Heart, Users, User, RefreshCw } from 'lucide-react-native';
+import { triggerHaptic } from '../../src/utils/haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { usePeopleWithAutoSeed, useCreatePerson } from '../../src/hooks/usePeople';
+import type { Person, GroupType } from '../../src/types/database';
 
-type Group = 'all' | 'work' | 'family' | 'friends' | 'acquaintances';
-
-interface Person {
-  id: string;
-  name: string;
-  group: 'work' | 'family' | 'friends' | 'acquaintances';
-  role?: string;
-  health: number;
-}
-
-// Demo data
-const demoPeople: Person[] = [
-  { id: '1', name: 'Sarah Chen', group: 'work', role: 'Manager', health: 85 },
-  { id: '2', name: 'Mom', group: 'family', role: 'Parent', health: 90 },
-  { id: '3', name: 'Alex Rivera', group: 'friends', role: 'Close friend', health: 75 },
-  { id: '4', name: 'Dr. Amanda', group: 'acquaintances', role: 'Doctor', health: 60 },
-  { id: '5', name: 'Marcus Johnson', group: 'work', role: 'Colleague', health: 70 },
-  { id: '6', name: 'Dad', group: 'family', role: 'Parent', health: 95 },
-];
+type Group = 'all' | GroupType;
 
 const groupConfig = {
   work: { icon: Briefcase, color: '#6366F1', label: 'Work' },
@@ -43,28 +27,61 @@ const filters: { id: Group; label: string }[] = [
 ];
 
 export default function CircleScreen() {
+  const { data: people, isLoading, error, refetch } = usePeopleWithAutoSeed();
+  const createPerson = useCreatePerson();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<Group>('all');
 
-  const filteredPeople = demoPeople.filter((person) => {
+  const filteredPeople = (people || []).filter((person) => {
     const matchesSearch = person.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = selectedFilter === 'all' || person.group === selectedFilter;
     return matchesSearch && matchesFilter;
   });
 
   const handleFilterSelect = (filter: Group) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.light();
     setSelectedFilter(filter);
   };
 
   const handlePersonPress = (personId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.light();
     router.push(`/person/${personId}`);
+  };
+
+  const handleAddPerson = () => {
+    triggerHaptic.medium();
+    // For now, show a simple alert. In production, this would open a modal
+    Alert.prompt(
+      'Add Person',
+      'Enter the name of the person you want to add:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Add',
+          onPress: async (name) => {
+            if (name && name.trim()) {
+              try {
+                await createPerson.mutateAsync({
+                  name: name.trim(),
+                  group: 'friends', // Default group
+                });
+                triggerHaptic.success();
+              } catch (err) {
+                Alert.alert('Error', 'Failed to add person');
+              }
+            }
+          },
+        },
+      ],
+      'plain-text'
+    );
   };
 
   const renderPerson = ({ item, index }: { item: Person; index: number }) => {
     const config = groupConfig[item.group];
     const Icon = config.icon;
+    const health = item.relationship_health || 50;
 
     return (
       <Animated.View entering={FadeInDown.delay(index * 50)}>
@@ -80,26 +97,41 @@ export default function CircleScreen() {
           </View>
           <View className="flex-1">
             <Text className="text-white font-semibold text-lg">{item.name}</Text>
-            <Text className="text-white/50 text-sm">{item.role}</Text>
+            <Text className="text-white/50 text-sm">{item.role || item.subgroup || config.label}</Text>
           </View>
           <View className="items-end">
-            <View
-              className="w-10 h-2 rounded-full overflow-hidden bg-white/10"
-            >
+            <View className="w-10 h-2 rounded-full overflow-hidden bg-white/10">
               <View
                 className="h-full rounded-full"
                 style={{
-                  width: `${item.health}%`,
-                  backgroundColor: item.health > 70 ? '#10B981' : item.health > 40 ? '#F59E0B' : '#EF4444',
+                  width: `${health}%`,
+                  backgroundColor: health > 70 ? '#10B981' : health > 40 ? '#F59E0B' : '#EF4444',
                 }}
               />
             </View>
-            <Text className="text-white/40 text-xs mt-1">{item.health}%</Text>
+            <Text className="text-white/40 text-xs mt-1">{health}%</Text>
           </View>
         </Pressable>
       </Animated.View>
     );
   };
+
+  if (error) {
+    return (
+      <LinearGradient colors={['#0f0a1a', '#1a0a2e', '#0f0a1a']} className="flex-1">
+        <SafeAreaView className="flex-1 items-center justify-center px-4">
+          <Text className="text-white text-lg mb-4">Failed to load your circle</Text>
+          <Pressable
+            onPress={() => refetch()}
+            className="flex-row items-center gap-2 px-6 py-3 bg-primary-500 rounded-xl"
+          >
+            <RefreshCw size={20} color="white" />
+            <Text className="text-white font-medium">Try Again</Text>
+          </Pressable>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
 
   return (
     <LinearGradient
@@ -112,10 +144,15 @@ export default function CircleScreen() {
           <View className="flex-row items-center justify-between mb-4">
             <Text className="text-2xl font-bold text-white">My Circle</Text>
             <Pressable
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              onPress={handleAddPerson}
+              disabled={createPerson.isPending}
               className="w-10 h-10 rounded-full bg-primary-500 items-center justify-center"
             >
-              <Plus size={24} color="white" />
+              {createPerson.isPending ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Plus size={24} color="white" />
+              )}
             </Pressable>
           </View>
 
@@ -156,18 +193,35 @@ export default function CircleScreen() {
         </View>
 
         {/* People List */}
-        <FlatList
-          data={filteredPeople}
-          renderItem={renderPerson}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View className="items-center justify-center py-12">
-              <Text className="text-white/50 text-lg">No people found</Text>
-            </View>
-          }
-        />
+        {isLoading ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size="large" color="#8B5CF6" />
+            <Text className="text-white/50 mt-4">Loading your circle...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredPeople}
+            renderItem={renderPerson}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View className="items-center justify-center py-12">
+                <Text className="text-white/50 text-lg">
+                  {searchQuery ? 'No people found' : 'Your circle is empty'}
+                </Text>
+                {!searchQuery && (
+                  <Pressable
+                    onPress={handleAddPerson}
+                    className="mt-4 px-6 py-3 bg-primary-500 rounded-xl"
+                  >
+                    <Text className="text-white font-medium">Add Someone</Text>
+                  </Pressable>
+                )}
+              </View>
+            }
+          />
+        )}
       </SafeAreaView>
     </LinearGradient>
   );
