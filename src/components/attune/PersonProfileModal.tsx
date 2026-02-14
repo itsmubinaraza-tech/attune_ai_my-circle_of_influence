@@ -39,6 +39,8 @@ interface PersonProfileModalProps {
   onClose: () => void;
   onPersonUpdated?: (person: Person) => void;
   onPersonDeleted?: (personId: string) => void;
+  /** Mock person data for anonymous users viewing demo contacts */
+  mockPerson?: Person | null;
 }
 
 const groupColors = {
@@ -61,8 +63,16 @@ export default function PersonProfileModal({
   onClose,
   onPersonUpdated,
   onPersonDeleted,
+  mockPerson,
 }: PersonProfileModalProps) {
-  const { data: person, isLoading, error } = usePerson(personId);
+  // Use mockPerson if provided (for anonymous users), otherwise fetch from database
+  const { data: fetchedPerson, isLoading: fetchLoading, error: fetchError } = usePerson(mockPerson ? null : personId);
+
+  // Use mockPerson if provided, otherwise use fetched data
+  const person = mockPerson || fetchedPerson;
+  const isLoading = mockPerson ? false : fetchLoading;
+  const error = mockPerson ? null : fetchError;
+  const isViewOnly = !!mockPerson; // View-only mode for mock data
   const { data: connections = [], isLoading: connectionsLoading } = useConnectionsForPerson(personId);
   const updatePerson = useUpdatePerson();
   const archivePerson = useArchivePerson();
@@ -288,7 +298,16 @@ export default function PersonProfileModal({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {isEditing ? (
+                  {isViewOnly ? (
+                    // View-only mode for mock/demo data
+                    <button
+                      onClick={onClose}
+                      className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                      title="Close"
+                    >
+                      <X className="w-5 h-5 text-foreground/60" />
+                    </button>
+                  ) : isEditing ? (
                     <>
                       <button
                         onClick={() => setIsEditing(false)}
@@ -331,17 +350,34 @@ export default function PersonProfileModal({
                 </div>
               </div>
 
-              {/* Relationship Insights */}
-              <div className="mb-6">
-                <RelationshipSummaryCard
-                  personId={person.id}
-                  personName={person.name}
-                  compact={false}
-                />
-              </div>
+              {/* Relationship Insights - only show for authenticated users */}
+              {!isViewOnly && (
+                <div className="mb-6">
+                  <RelationshipSummaryCard
+                    personId={person.id}
+                    personName={person.name}
+                    compact={false}
+                  />
+                </div>
+              )}
 
-              {/* Group Selection (Edit Mode) */}
-              {isEditing && (
+              {/* Sign-up prompt for view-only mode */}
+              {isViewOnly && (
+                <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                  <p className="text-sm text-foreground/80 mb-3">
+                    This is a demo contact. Sign up to add your own contacts and unlock full features!
+                  </p>
+                  <a
+                    href="/signup"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
+                  >
+                    Sign Up Free
+                  </a>
+                </div>
+              )}
+
+              {/* Group Selection (Edit Mode) - not available in view-only mode */}
+              {isEditing && !isViewOnly && (
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-foreground/70 mb-3">Group</label>
                   <div className="grid grid-cols-4 gap-2">
@@ -376,8 +412,8 @@ export default function PersonProfileModal({
                 </div>
               )}
 
-              {/* Subgroup Selection (Edit Mode) */}
-              {isEditing && (
+              {/* Subgroup Selection (Edit Mode) - not available in view-only mode */}
+              {isEditing && !isViewOnly && (
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-foreground/70 mb-2">Subgroup</label>
                   <div className="flex flex-wrap gap-2">
@@ -485,90 +521,93 @@ export default function PersonProfileModal({
                 )}
               </div>
 
-              {/* Connections */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Link2 className="w-4 h-4 text-foreground/40" />
-                    <span className="text-sm font-medium text-foreground/70">Connections</span>
-                    {connections.length > 0 && (
-                      <span className="text-xs text-foreground/40">({connections.length})</span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setShowAddConnectionModal(true)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-purple-400 hover:bg-purple-500/10 transition-colors"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Add
-                  </button>
-                </div>
-
-                {connectionsLoading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader2 className="w-5 h-5 animate-spin text-foreground/30" />
-                  </div>
-                ) : connections.length === 0 ? (
-                  <div className="p-4 rounded-xl bg-white/5 text-center">
-                    <p className="text-sm text-foreground/50">No connections yet</p>
+              {/* Connections - only show for authenticated users */}
+              {!isViewOnly && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Link2 className="w-4 h-4 text-foreground/40" />
+                      <span className="text-sm font-medium text-foreground/70">Connections</span>
+                      {connections.length > 0 && (
+                        <span className="text-xs text-foreground/40">({connections.length})</span>
+                      )}
+                    </div>
                     <button
                       onClick={() => setShowAddConnectionModal(true)}
-                      className="mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-purple-400 hover:bg-purple-500/10 transition-colors"
                     >
-                      Link to another person
+                      <Plus className="w-3 h-3" />
+                      Add
                     </button>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    {connections.map((connection) => {
-                      const otherPerson =
-                        connection.person_a.id === personId
-                          ? connection.person_b
-                          : connection.person_a;
-                      return (
-                        <div
-                          key={connection.id}
-                          className="flex items-center gap-3 p-3 rounded-xl bg-white/5 group"
-                        >
-                          <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                            style={{ background: groupColors[otherPerson.group as keyof typeof groupColors] }}
-                          >
-                            {otherPerson.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground/90 truncate">
-                              {otherPerson.name}
-                            </p>
-                            <p className="text-xs text-foreground/50">
-                              {getConnectionTypeLabel(connection.connection_type)}
-                              {connection.notes && (
-                                <span className="text-foreground/30"> • {connection.notes}</span>
-                              )}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => {
-                              if (confirm('Remove this connection?')) {
-                                deleteConnection.mutate(connection.id, {
-                                  onSuccess: () => toast.success('Connection removed'),
-                                  onError: () => toast.error('Failed to remove connection'),
-                                });
-                              }
-                            }}
-                            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all"
-                            title="Remove connection"
-                          >
-                            <X className="w-3 h-3 text-red-400" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
 
-              {/* Interactions */}
+                  {connectionsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-foreground/30" />
+                    </div>
+                  ) : connections.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-white/5 text-center">
+                      <p className="text-sm text-foreground/50">No connections yet</p>
+                      <button
+                        onClick={() => setShowAddConnectionModal(true)}
+                        className="mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                      >
+                        Link to another person
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {connections.map((connection) => {
+                        const otherPerson =
+                          connection.person_a.id === personId
+                            ? connection.person_b
+                            : connection.person_a;
+                        return (
+                          <div
+                            key={connection.id}
+                            className="flex items-center gap-3 p-3 rounded-xl bg-white/5 group"
+                          >
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                              style={{ background: groupColors[otherPerson.group as keyof typeof groupColors] }}
+                            >
+                              {otherPerson.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground/90 truncate">
+                                {otherPerson.name}
+                              </p>
+                              <p className="text-xs text-foreground/50">
+                                {getConnectionTypeLabel(connection.connection_type)}
+                                {connection.notes && (
+                                  <span className="text-foreground/30"> • {connection.notes}</span>
+                                )}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => {
+                                if (confirm('Remove this connection?')) {
+                                  deleteConnection.mutate(connection.id, {
+                                    onSuccess: () => toast.success('Connection removed'),
+                                    onError: () => toast.error('Failed to remove connection'),
+                                  });
+                                }
+                              }}
+                              className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all"
+                              title="Remove connection"
+                            >
+                              <X className="w-3 h-3 text-red-400" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Interactions - only show for authenticated users */}
+              {!isViewOnly && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -589,8 +628,10 @@ export default function PersonProfileModal({
                   compact
                 />
               </div>
+              )}
 
-              {/* Conversations (AI Coaching Sessions) */}
+              {/* Conversations (AI Coaching Sessions) - only show for authenticated users */}
+              {!isViewOnly && (
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <MessageCircle className="w-4 h-4 text-purple-400/60" />
@@ -603,8 +644,11 @@ export default function PersonProfileModal({
                   limit={3}
                 />
               </div>
+              )}
 
-              {/* Advanced Actions */}
+              {/* Advanced Actions - only show for authenticated users */}
+              {!isViewOnly && (
+              <>
               <button
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className="flex items-center gap-2 text-sm text-foreground/50 hover:text-foreground/70 transition-colors mb-4"
@@ -664,6 +708,8 @@ export default function PersonProfileModal({
                   </motion.div>
                 )}
               </AnimatePresence>
+              </>
+              )}
 
               {/* Meta info */}
               <div className="text-xs text-foreground/30 text-center pt-4 border-t border-white/5">

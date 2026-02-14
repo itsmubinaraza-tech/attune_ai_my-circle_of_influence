@@ -6,7 +6,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-user-token',
 };
 
 // Rate limiting: Track requests per IP (in-memory, resets on cold start)
@@ -75,7 +75,7 @@ FORMAT YOUR RESPONSE WITH:
 1. **WHAT TO SAY** - 2-3 specific phrases to use
 2. **HOW TO SAY IT** - Tone and body language tips
 3. **WHAT TO EXPECT** - Likely responses and how to handle them
-4. **NEXT STEP** - One clear action to take in 24-48 hours
+4. **EXPERT ADVICE** - Wisdom from relationship experts
 
 Be direct, warm, and practical. Keep responses focused and scannable.`;
 

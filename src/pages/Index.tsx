@@ -191,6 +191,7 @@ const Index = () => {
   const [showAddPersonModal, setShowAddPersonModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfilePersonId, setSelectedProfilePersonId] = useState<string | null>(null);
+  const [selectedMockPerson, setSelectedMockPerson] = useState<DbPerson | null>(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedAttentionPerson, setSelectedAttentionPerson] = useState<{
     id: string;
@@ -290,8 +291,20 @@ const Index = () => {
 
   // Open person profile modal
   const handleOpenProfile = (personId: string) => {
-    // Only open profile for real database entries (not mock data)
-    if (!personId.startsWith("mock-") && !personId.startsWith("custom-") && personId.length > 10) {
+    // Check if this is mock data (short IDs like "w1", "f1", etc.)
+    const isMockId = personId.length <= 5 || personId.startsWith("mock-") || personId.startsWith("custom-");
+
+    if (isMockId) {
+      // For mock data, find the person in mockDbPeople and show in view-only mode
+      const mockP = mockDbPeople.find(p => p.id === personId);
+      if (mockP) {
+        setSelectedMockPerson(mockP);
+        setSelectedProfilePersonId(null);
+        setShowProfileModal(true);
+      }
+    } else {
+      // Real database entry
+      setSelectedMockPerson(null);
       setSelectedProfilePersonId(personId);
       setShowProfileModal(true);
     }
@@ -863,7 +876,9 @@ const Index = () => {
         onClose={() => {
           setShowProfileModal(false);
           setSelectedProfilePersonId(null);
+          setSelectedMockPerson(null);
         }}
+        mockPerson={selectedMockPerson}
       />
 
       {/* Quick Talk Modal - Voice-first flow */}

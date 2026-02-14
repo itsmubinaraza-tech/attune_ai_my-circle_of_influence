@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, AlertTriangle, FileText, Bot, Database, Check, Phone } from 'lucide-react';
 import { useRecordAllConsents } from '@/hooks/useConsent';
+import { toast } from 'sonner';
 
 interface ConsentModalProps {
   isOpen: boolean;
@@ -54,6 +55,11 @@ export default function ConsentModal({
       onAccept();
     } catch (error) {
       console.error('Failed to record consents:', error);
+      // Show error toast but still allow the user to proceed
+      // since consent acceptance is more important than the database record
+      toast.error('Could not save consent preferences. You may proceed, but please contact support if issues persist.');
+      // Still call onAccept to allow user to continue
+      onAccept();
     } finally {
       setIsSubmitting(false);
     }

@@ -48,6 +48,7 @@ export default function QuickTalkModal({ isOpen, onClose }: QuickTalkModalProps)
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const manualStopRef = useRef(false);
 
   // Check if speech recognition is supported
   const isSpeechSupported = typeof window !== 'undefined' &&
@@ -59,18 +60,22 @@ export default function QuickTalkModal({ isOpen, onClose }: QuickTalkModalProps)
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
-    recognitionRef.current.continuous = false;
+    recognitionRef.current.continuous = true;
     recognitionRef.current.interimResults = true;
     recognitionRef.current.lang = 'en-US';
 
     recognitionRef.current.onresult = (event) => {
-      const current = event.resultIndex;
-      const result = event.results[current];
-      const text = result[0].transcript;
-      setTranscript(text);
+      // Combine all results into full transcript
+      let fullTranscript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        fullTranscript += event.results[i][0].transcript;
+      }
+      setTranscript(fullTranscript);
 
-      if (result.isFinal) {
-        handleTranscriptComplete(text);
+      // Check if latest result is final
+      const latestResult = event.results[event.results.length - 1];
+      if (latestResult.isFinal) {
+        handleTranscriptComplete(fullTranscript);
       }
     };
 
@@ -83,7 +88,18 @@ export default function QuickTalkModal({ isOpen, onClose }: QuickTalkModalProps)
     };
 
     recognitionRef.current.onend = () => {
-      setIsListening(false);
+      // Only stop if user manually stopped, otherwise auto-restart
+      if (manualStopRef.current) {
+        setIsListening(false);
+        manualStopRef.current = false;
+      } else if (isListening) {
+        // Auto-restart if not manually stopped (browser may auto-stop after silence)
+        try {
+          recognitionRef.current?.start();
+        } catch (e) {
+          setIsListening(false);
+        }
+      }
     };
 
     return () => {
@@ -126,7 +142,8 @@ export default function QuickTalkModal({ isOpen, onClose }: QuickTalkModalProps)
   const startListening = useCallback(() => {
     if (!recognitionRef.current || isListening) return;
 
-    setTranscript('');
+    // Don't clear transcript - allow appending (user can clear if needed)
+    manualStopRef.current = false;
     setIsListening(true);
     try {
       recognitionRef.current.start();
@@ -139,6 +156,7 @@ export default function QuickTalkModal({ isOpen, onClose }: QuickTalkModalProps)
   // Stop listening
   const stopListening = useCallback(() => {
     if (recognitionRef.current && isListening) {
+      manualStopRef.current = true;
       recognitionRef.current.stop();
       setIsListening(false);
     }

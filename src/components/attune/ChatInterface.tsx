@@ -33,6 +33,8 @@ const ChatInterface = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const manualStopRef = useRef(false);
+  const inputValueBeforeVoiceRef = useRef('');
 
   // Check for Web Speech API support
   useEffect(() => {
@@ -41,24 +43,42 @@ const ChatInterface = ({
 
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
+      recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0].transcript)
-          .join('');
+        // Combine all results into full transcript
+        let fullTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          fullTranscript += event.results[i][0].transcript;
+        }
 
-        setInputValue(transcript);
+        // Append to existing input value (captured when voice started)
+        const prefix = inputValueBeforeVoiceRef.current;
+        const separator = prefix && !prefix.endsWith(' ') ? ' ' : '';
+        setInputValue(prefix + separator + fullTranscript);
 
-        if (event.results[0].isFinal) {
-          onVoiceInput?.(transcript);
+        // Check if latest result is final
+        const latestResult = event.results[event.results.length - 1];
+        if (latestResult.isFinal) {
+          onVoiceInput?.(fullTranscript);
         }
       };
 
       recognitionRef.current.onend = () => {
-        setIsListening(false);
+        // Only stop if user manually stopped, otherwise auto-restart
+        if (manualStopRef.current) {
+          setIsListening(false);
+          manualStopRef.current = false;
+        } else if (isListening) {
+          // Auto-restart if not manually stopped
+          try {
+            recognitionRef.current?.start();
+          } catch (e) {
+            setIsListening(false);
+          }
+        }
       };
 
       recognitionRef.current.onerror = () => {
@@ -108,9 +128,13 @@ const ChatInterface = ({
     if (!recognitionRef.current) return;
 
     if (isListening) {
+      manualStopRef.current = true;
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
+      // Capture current input value before starting voice
+      inputValueBeforeVoiceRef.current = inputValue;
+      manualStopRef.current = false;
       recognitionRef.current.start();
       setIsListening(true);
     }

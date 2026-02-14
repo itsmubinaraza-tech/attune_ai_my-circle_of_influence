@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as peopleService from '@/services/people';
+import { supabase } from '@/lib/supabase';
 import type { Person, PersonInsert, PersonUpdate, GroupType } from '@/types/database';
 
 const PEOPLE_KEY = ['people'];
@@ -156,6 +157,14 @@ export function usePeopleWithAutoSeed() {
   return useQuery({
     queryKey: [...PEOPLE_KEY, 'withAutoSeed'],
     queryFn: async () => {
+      // Check if user is authenticated first
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // If not authenticated, return empty array without trying to seed
+      if (!user) {
+        return [];
+      }
+
       // First, fetch existing people
       const people = await peopleService.getPeople();
 

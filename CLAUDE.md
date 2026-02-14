@@ -153,6 +153,48 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=
 
 # Changelog
 
+## [2026-02-14] Bug Fixes and UX Improvements
+
+### Issue 1: Walkthrough Text Punctuation
+- Changed em-dashes to colons/periods for better readability in onboarding steps
+
+### Issue 2: Expert Advice Format
+- Changed "NEXT STEP" to "EXPERT ADVICE" in AI response format
+- Updated fallback responses with structured 4-part format including expert quotes
+
+### Issue 3: Terms Modal Error Handling
+- Added toast notification when consent recording fails
+- Modal now closes even on error, allowing user to continue
+
+### Issue 4: Console Errors Fixed
+- Added `x-user-token` to CORS allowed headers in Edge Function
+- Skip demo data seeding for unauthenticated users (prevents 401 errors)
+
+### Issue 5 & 6: Anonymous Person Selection
+- Added `mockPerson` prop to PersonProfileModal for demo data viewing
+- Anonymous users can now view demo contact profiles in view-only mode
+- Added sign-up prompt in view-only modal
+
+### Issue 7: Voice Recording Improvements
+- Set `continuous = true` for speech recognition (records through pauses)
+- Voice input now appends to existing text instead of replacing
+- Added manual stop tracking to prevent auto-restart on user stop
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `src/contexts/OnboardingContext.tsx` | Updated walkthrough text punctuation |
+| `src/services/ai.ts` | Updated fallback responses with 4-part EXPERT ADVICE format |
+| `src/components/legal/ConsentModal.tsx` | Added toast import, improved error handling |
+| `supabase/functions/chat/index.ts` | Added x-user-token CORS header, changed NEXT STEP to EXPERT ADVICE |
+| `src/hooks/usePeople.ts` | Added auth check before demo seeding |
+| `src/components/attune/PersonProfileModal.tsx` | Added mockPerson prop, view-only mode, sign-up prompt |
+| `src/pages/Index.tsx` | Pass mock person data to modal for demo contacts |
+| `src/components/attune/QuickTalkModal.tsx` | Continuous voice recording, manual stop tracking |
+| `src/components/attune/ChatInterface.tsx` | Continuous voice recording, append to input |
+
+---
+
 ## [2026-02-09] Google OAuth Implementation
 
 ### Mobile Google Sign-In - IMPLEMENTED

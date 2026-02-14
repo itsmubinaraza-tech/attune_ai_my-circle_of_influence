@@ -232,7 +232,7 @@ export function shouldUseFallback(error: unknown): boolean {
   return true;
 }
 
-// Fallback responses when API is unavailable - More actionable and practical
+// Fallback responses when API is unavailable - 4-part structured format with EXPERT ADVICE
 const FALLBACK_RESPONSES = {
   greeting: [
     "I'm here to help you build stronger connections. Tell me: who do you want to connect with, and what's the situation? I'll give you specific things to say and do.",
@@ -249,12 +249,65 @@ const FALLBACK_RESPONSES = {
     `Feeling ${mood} is valid. Here's the thing: your emotional state affects your tone and body language. Let's make sure you're prepared. What's the conversation or situation you're facing?`,
   ],
   general: [
-    "Let me give you something actionable. **Try this**: Next time you see them, start with a genuine compliment or observation, then ask an open-ended question about something they care about. What specific topic could you ask about?",
-    "Here's a practical framework: **1)** Lead with curiosity, not judgment. **2)** Ask 'what' and 'how' questions, not 'why.' **3)** Reflect back what you hear before responding. What part of this feels most relevant to your situation?",
-    "**Brené Brown would say**: Vulnerability isn't weakness—it's courage. **Adam Grant would say**: Give before you ask. **Simon Sinek would say**: Start with why you value this relationship. Which approach resonates with you?",
-    "One small step you could take today: Send a brief message that shows you were thinking of them. Something like: 'Hey, I saw [something relevant] and thought of you. How are you doing?' Would that work for this situation?",
-    "Let's get specific. **What to say**: Start with something genuine you appreciate about them. **How to say it**: Warm tone, relaxed posture, good eye contact. **What to expect**: They may be surprised but will likely appreciate it. What's holding you back from trying this?",
-    "Here's the key insight: People remember how you made them feel, not what you said. Focus on being fully present and genuinely curious. What would it look like to bring that energy to your next interaction?",
+    `**WHAT TO SAY**
+Start with a genuine compliment or observation, then ask an open-ended question about something they care about.
+
+**HOW TO SAY IT**
+Use a warm, curious tone. Maintain relaxed posture and natural eye contact. Let pauses happen naturally.
+
+**WHAT TO EXPECT**
+They may be surprised by your directness but will likely appreciate the genuine interest. Be ready to listen actively.
+
+**EXPERT ADVICE**
+*"The quality of your relationships determines the quality of your life."* — Esther Perel. Focus on being present rather than perfect.`,
+
+    `**WHAT TO SAY**
+"I've been thinking about you and wanted to check in. How have you been doing lately?"
+
+**HOW TO SAY IT**
+Lead with curiosity, not judgment. Ask 'what' and 'how' questions, not 'why.' Reflect back what you hear before responding.
+
+**WHAT TO EXPECT**
+They may open up gradually or test your sincerity first. Give them space to share at their own pace.
+
+**EXPERT ADVICE**
+*"Vulnerability is the birthplace of connection."* — Brené Brown. Being genuine about your care creates safety for deeper conversation.`,
+
+    `**WHAT TO SAY**
+Express appreciation first: "I really value our relationship and want to make sure we're on the same page about..."
+
+**HOW TO SAY IT**
+Warm tone, open body language. Avoid crossing arms or looking at your phone. Give them your full attention.
+
+**WHAT TO EXPECT**
+Starting with appreciation usually softens any tension. They're more likely to be receptive to what follows.
+
+**EXPERT ADVICE**
+*"Give before you ask."* — Adam Grant. Leading with generosity creates goodwill that makes difficult conversations easier.`,
+
+    `**WHAT TO SAY**
+"I noticed [specific observation] and wanted to understand your perspective better. Can you help me understand?"
+
+**HOW TO SAY IT**
+Stay curious, not defensive. Focus on understanding before being understood. Mirror their energy level.
+
+**WHAT TO EXPECT**
+People generally respond well to genuine curiosity. They may share more than you expected.
+
+**EXPERT ADVICE**
+*"Start with why."* — Simon Sinek. When people understand your positive intent, they're more open to the conversation.`,
+
+    `**WHAT TO SAY**
+"Hey, I saw [something relevant] and thought of you. How are you doing?"
+
+**HOW TO SAY IT**
+Keep it brief and genuine. Don't overthink it—authenticity beats perfection every time.
+
+**WHAT TO EXPECT**
+A simple message showing you were thinking of them often means more than elaborate gestures.
+
+**EXPERT ADVICE**
+*"People will forget what you said, but they will never forget how you made them feel."* — Maya Angelou. Connection starts with presence.`,
   ],
 };
 

@@ -16,7 +16,7 @@ export const onboardingSteps: OnboardingStep[] = [
   {
     id: 'welcome',
     title: 'Every great conversation starts with you',
-    description: "Attune is your personal guide for the conversations that matter most — at work, at home, and everywhere in between. Let's take 30 seconds to show you how it works.",
+    description: "Attune is your personal guide for the conversations that matter most: at work, at home, and everywhere in between. Let's take 30 seconds to show you how it works.",
     benefit: 'No scripts. No judgment. Just clarity when you need it most.',
     targetSelector: '[data-onboarding="hero"]',
     position: 'bottom',
@@ -25,7 +25,7 @@ export const onboardingSteps: OnboardingStep[] = [
   {
     id: 'mood',
     title: 'Start by checking in with yourself',
-    description: "How you're feeling shapes how you communicate. Tap your current mood — there's no wrong answer, just honest awareness.",
+    description: "How you're feeling shapes how you communicate. Tap your current mood. There's no wrong answer, just honest awareness.",
     benefit: 'Self-awareness is the first step to better conversations.',
     targetSelector: '[data-onboarding="mood-selector"]',
     position: 'bottom',
@@ -34,7 +34,7 @@ export const onboardingSteps: OnboardingStep[] = [
   {
     id: 'person',
     title: "Who's on your mind?",
-    description: "Select someone from your circle — a colleague, family member, or friend. We'll tailor our guidance to your unique relationship.",
+    description: "Select someone from your circle. A colleague, family member, or friend. We'll tailor our guidance to your unique relationship.",
     benefit: 'Context matters. The same words land differently with different people.',
     targetSelector: '[data-onboarding="person-search"]',
     position: 'bottom',
