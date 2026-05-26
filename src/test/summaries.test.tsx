@@ -482,7 +482,9 @@ describe('CircleInsightsWidget Component', () => {
     renderWithQueryClient(<CircleInsightsWidget />);
 
     await waitFor(() => {
-      expect(screen.getByText('Unable to load insights')).toBeInTheDocument();
+      expect(
+        screen.getByText(/don't have data to show health of your relationships/i)
+      ).toBeInTheDocument();
     });
   });
 

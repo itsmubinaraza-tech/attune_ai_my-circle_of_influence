@@ -174,7 +174,7 @@ describe('Feature 2.3: Circle Dashboard', () => {
       renderWithProviders(<Circle />);
 
       await waitFor(() => {
-        expect(screen.getByText('My Circle')).toBeInTheDocument();
+        expect(screen.getByText('Circle of Influence')).toBeInTheDocument();
       });
     });
 
@@ -190,8 +190,9 @@ describe('Feature 2.3: Circle Dashboard', () => {
     it('should have back button to home', async () => {
       renderWithProviders(<Circle />);
 
-      const backLink = document.querySelector('a[href="/"]');
-      expect(backLink).toBeTruthy();
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /back to home/i })).toBeInTheDocument();
+      });
     });
 
     it('should have Add Person button', async () => {

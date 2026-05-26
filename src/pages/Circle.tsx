@@ -218,6 +218,7 @@ export default function Circle() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/')}
+                aria-label="Back to home"
                 className="p-2 rounded-full hover:bg-white/10 transition-colors"
               >
                 <ChevronLeft className="w-5 h-5 text-foreground/70" />
