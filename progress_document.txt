@@ -32,6 +32,22 @@ GENUINELY REMAINING (the real Phase 2 work):
 LOCKED DECISIONS: subscriptions first; Free=10 msgs/mo (was 50); Starter $4.99 /
   Growth $9.99 / Premium $19.99; new /me Account page; landing page must NOT change.
 
+--------------------------------------------------------------------------------
+FEATURE A1: Stripe subscriptions — CODE-COMPLETE (2026-05-26)
+  Each sub-feature is one atomic commit + a version tag (rollback points):
+    A1.1 DB migration + types ............ 41f01e9   tag: phase2-a1.1
+    A1.2 tier model + tier-aware credits . 0471f5e   tag: phase2-a1.2
+    A1.3 create-checkout + webhook fns ... b7f034f   tag: phase2-a1.3
+    A1.4 stripe.ts + customer-portal fn .. 2356272   tag: phase2-a1.4
+    A1.5 /me Account page + upgrade UI ... 73e110e   tag: phase2-a1.5
+    A1.6 tier-based model + at-limit CTA . f44f621   tag: phase2-a1.6
+  Verified (automated): tsc --noEmit clean, production build OK, 308/308 tests.
+  PENDING runtime verification (needs user): create Stripe account + 3 products,
+    set Supabase secrets, apply migrations, deploy 3 edge functions. See A1
+    VALIDATION CARD in chat / PHASE2_PLAN.md.
+  Rollback: `git revert <hash>` for one feature, or `git checkout phase2-a1.N`
+    to inspect a checkpoint. Tags pushed to origin.
+
 ================================================================================
                               PROGRESS OVERVIEW
 ================================================================================

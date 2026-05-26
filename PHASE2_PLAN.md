@@ -269,7 +269,7 @@ sequenceDiagram
 | **A2: Person Profile + Circle Dashboard** | ✅ Complete (audit) | — | pre-existing |
 | **A3: Interaction Logging + Health** | ✅ Complete (audit) | — | pre-existing |
 | **C2(UI): Reminders widget + modal** | ✅ Complete (audit) | — | pre-existing |
-| **A1: Stripe (subscriptions)** | 🔄 In progress | — | 2026-05-26 |
+| **A1: Stripe (subscriptions)** | ✅ Code-complete (⏳ deploy) | 41f01e9..f44f621 | 2026-05-26 |
 | **A4: API Keys Table** | 🔲 Not started (MCP prereq) | — | — |
 | **B1: MCP Setup** | 🔲 Not started | — | — |
 | **B2: Core MCP Tools** | 🔲 Not started | — | — |

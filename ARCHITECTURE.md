@@ -169,7 +169,7 @@ Deferred until Step 4. Sequence diagram retained in `PHASE2_PLAN.md` Section 3.
 | App | Reminders widget + create modal (UI) | ✅ |
 | App | Connections, Summaries/Insights UI | ✅ |
 | Compliance | Consent records + legal document versions | ✅ |
-| **A1** | Stripe subscriptions (DB, edge fns, /me page, enforcement) | 🔄 in progress |
+| **A1** | Stripe subscriptions (DB, edge fns, /me page, enforcement) | ✅ code-complete · ⏳ pending Stripe keys + deploy |
 | **C1** | Smart summaries edge fn + Reflect page | 🔲 |
 | **C2** | send-reminders edge fn (email digest) | 🔲 |
 | **A4** | api_keys table + service + manager UI | 🔲 (MCP prereq) |
