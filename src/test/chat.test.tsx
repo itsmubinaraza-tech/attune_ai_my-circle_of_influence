@@ -197,9 +197,9 @@ describe('Credits Service', () => {
   });
 
   describe('constants', () => {
-    it('should have default monthly credits', async () => {
+    it('should have default monthly credits (free tier = 10)', async () => {
       const { creditsService } = await import('@/services/credits');
-      expect(creditsService.DEFAULT_MONTHLY_CREDITS).toBe(50);
+      expect(creditsService.DEFAULT_MONTHLY_CREDITS).toBe(10);
     });
 
     it('should have credits per message', async () => {

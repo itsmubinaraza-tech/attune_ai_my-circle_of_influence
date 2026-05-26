@@ -1,8 +1,24 @@
 import { supabase } from '@/lib/supabase';
-import type { UserCredits } from '@/types/database';
+import type { UserCredits, SubscriptionTier } from '@/types/database';
+import { getMonthlyCredits, isUnlimited, TIERS } from '@/config/tiers';
 
-export const DEFAULT_MONTHLY_CREDITS = 50;
+/** Free-tier monthly allowance. Kept for backward-compat; allocation is tier-driven below. */
+export const DEFAULT_MONTHLY_CREDITS = TIERS.free.monthlyCredits;
 export const CREDITS_PER_MESSAGE = 1;
+
+// Read the current user's subscription tier (defaults to 'free').
+export async function getUserTier(): Promise<SubscriptionTier> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 'free';
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('subscription_tier')
+    .eq('id', user.id)
+    .single();
+
+  return (data?.subscription_tier as SubscriptionTier) ?? 'free';
+}
 
 // Get user credits
 export async function getCredits(): Promise<UserCredits | null> {
@@ -31,19 +47,21 @@ export async function getCredits(): Promise<UserCredits | null> {
   return data;
 }
 
-// Initialize credits for a new user
+// Initialize credits for a new user (allocation based on their subscription tier)
 export async function initializeCredits(): Promise<UserCredits> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
+  const tier = await getUserTier();
+  const allocation = getMonthlyCredits(tier);
   const nextResetDate = getNextResetDate();
 
   const { data, error } = await supabase
     .from('user_credits')
     .insert({
       user_id: user.id,
-      credits_remaining: DEFAULT_MONTHLY_CREDITS,
-      credits_total: DEFAULT_MONTHLY_CREDITS,
+      credits_remaining: allocation,
+      credits_total: allocation,
       reset_date: nextResetDate.toISOString(),
     })
     .select()
@@ -53,12 +71,13 @@ export async function initializeCredits(): Promise<UserCredits> {
   return data;
 }
 
-// Use credits (deduct from remaining)
+// Use credits (deduct from remaining). Unlimited tiers never run out.
 export async function useCredits(amount: number = CREDITS_PER_MESSAGE): Promise<UserCredits> {
   const credits = await getCredits();
   if (!credits) throw new Error('No credits record found');
 
-  if (credits.credits_remaining < amount) {
+  const tier = await getUserTier();
+  if (!isUnlimited(tier) && credits.credits_remaining < amount) {
     throw new Error('Insufficient credits');
   }
 
@@ -76,8 +95,11 @@ export async function useCredits(amount: number = CREDITS_PER_MESSAGE): Promise<
   return data;
 }
 
-// Check if user has enough credits
+// Check if user has enough credits (unlimited tiers always pass)
 export async function hasCredits(amount: number = CREDITS_PER_MESSAGE): Promise<boolean> {
+  const tier = await getUserTier();
+  if (isUnlimited(tier)) return true;
+
   const credits = await getCredits();
   return credits ? credits.credits_remaining >= amount : false;
 }
@@ -102,15 +124,17 @@ export async function addBonusCredits(amount: number): Promise<UserCredits> {
   return data;
 }
 
-// Reset monthly credits
+// Reset monthly credits to the current tier's allowance
 async function resetMonthlyCredits(creditsId: string): Promise<UserCredits> {
+  const tier = await getUserTier();
+  const allocation = getMonthlyCredits(tier);
   const nextResetDate = getNextResetDate();
 
   const { data, error } = await supabase
     .from('user_credits')
     .update({
-      credits_remaining: DEFAULT_MONTHLY_CREDITS,
-      credits_total: DEFAULT_MONTHLY_CREDITS,
+      credits_remaining: allocation,
+      credits_total: allocation,
       reset_date: nextResetDate.toISOString(),
       updated_at: new Date().toISOString(),
     })
@@ -147,6 +171,7 @@ export function getDaysUntilReset(resetDate: string): number {
 // Export as service object
 export const creditsService = {
   getCredits,
+  getUserTier,
   initializeCredits,
   useCredits,
   hasCredits,
