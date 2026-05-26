@@ -18,6 +18,10 @@ export type Database = {
           full_name: string | null
           avatar_url: string | null
           preferences: Json | null
+          subscription_tier: SubscriptionTier
+          subscription_status: SubscriptionStatus
+          stripe_customer_id: string | null
+          subscription_ends_at: string | null
         }
         Insert: {
           id: string
@@ -27,6 +31,10 @@ export type Database = {
           full_name?: string | null
           avatar_url?: string | null
           preferences?: Json | null
+          subscription_tier?: SubscriptionTier
+          subscription_status?: SubscriptionStatus
+          stripe_customer_id?: string | null
+          subscription_ends_at?: string | null
         }
         Update: {
           id?: string
@@ -36,6 +44,39 @@ export type Database = {
           full_name?: string | null
           avatar_url?: string | null
           preferences?: Json | null
+          subscription_tier?: SubscriptionTier
+          subscription_status?: SubscriptionStatus
+          stripe_customer_id?: string | null
+          subscription_ends_at?: string | null
+        }
+      }
+      subscription_events: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string | null
+          event_type: string
+          stripe_event_id: string | null
+          tier: SubscriptionTier | null
+          raw: Json | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id?: string | null
+          event_type: string
+          stripe_event_id?: string | null
+          tier?: SubscriptionTier | null
+          raw?: Json | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string | null
+          event_type?: string
+          stripe_event_id?: string | null
+          tier?: SubscriptionTier | null
+          raw?: Json | null
         }
       }
       people: {
@@ -307,6 +348,8 @@ export type Database = {
       reminder_type: 'one_time' | 'recurring' | 'smart_nudge'
       reminder_status: 'pending' | 'completed' | 'snoozed' | 'dismissed'
       reminder_frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly'
+      subscription_tier: 'free' | 'starter' | 'growth' | 'premium'
+      subscription_status: 'active' | 'past_due' | 'canceled' | 'incomplete'
     }
   }
 }
@@ -326,9 +369,15 @@ export type ReminderUpdate = Database['public']['Tables']['reminders']['Update']
 export type InteractionInsert = Database['public']['Tables']['interactions']['Insert']
 export type InteractionUpdate = Database['public']['Tables']['interactions']['Update']
 
+export type SubscriptionEvent = Database['public']['Tables']['subscription_events']['Row']
+
 export type GroupType = 'work' | 'family' | 'friends' | 'acquaintances'
 export type ConnectionType = 'knows' | 'works_with' | 'related_to'
 export type InteractionOutcome = 'successful' | 'partial' | 'unsuccessful'
 export type ReminderTypeEnum = 'one_time' | 'recurring' | 'smart_nudge'
 export type ReminderStatus = 'pending' | 'completed' | 'snoozed' | 'dismissed'
 export type ReminderFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly'
+
+// Subscription / billing (Phase 2 / A1)
+export type SubscriptionTier = 'free' | 'starter' | 'growth' | 'premium'
+export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'incomplete'
