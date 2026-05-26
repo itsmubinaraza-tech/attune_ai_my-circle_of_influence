@@ -129,7 +129,12 @@ const Chat = () => {
     // Check for credits
     if (noCredits) {
       if (user) {
-        toast.error('No credits remaining. Your credits will reset next month.');
+        toast.error('No credits remaining this month. Upgrade for more.', {
+          action: {
+            label: 'Upgrade',
+            onClick: () => navigate('/me'),
+          },
+        });
       } else {
         toast.error('You\'ve used all 10 free messages. Sign up to continue!', {
           action: {

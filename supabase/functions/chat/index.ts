@@ -162,6 +162,12 @@ serve(async (req) => {
     const userToken = req.headers.get('x-user-token');
     let userId = 'anonymous';
 
+    // Model is tier-driven: free/starter -> Haiku, growth/premium -> Sonnet.
+    // (Tier->model mapping mirrors src/config/tiers.ts.)
+    const HAIKU = 'claude-3-haiku-20240307';
+    const SONNET = 'claude-3-5-sonnet-20241022';
+    let model = HAIKU;
+
     if (userToken) {
       // Verify user if token provided
       try {
@@ -174,6 +180,17 @@ serve(async (req) => {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (user) {
           userId = user.id;
+
+          // Pick the model for this user's subscription tier (RLS: own profile only).
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('subscription_tier')
+            .eq('id', user.id)
+            .single();
+          const tier = profile?.subscription_tier ?? 'free';
+          if (tier === 'growth' || tier === 'premium') {
+            model = SONNET;
+          }
         }
       } catch (e) {
         // Token validation failed, continue as anonymous
@@ -248,7 +265,7 @@ serve(async (req) => {
               'anthropic-version': '2023-06-01',
             },
             body: JSON.stringify({
-              model: 'claude-3-haiku-20240307',
+              model,
               max_tokens: 1024,
               system: systemPrompt,
               messages: claudeMessages,
