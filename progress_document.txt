@@ -3,7 +3,34 @@
 ================================================================================
 Project: Attune - My Circle of Influence
 Started: January 31, 2026
-Last Updated: January 31, 2026
+Last Updated: May 26, 2026
+
+================================================================================
+                    SESSION: 2026-05-26  (Phase 2 kickoff)
+================================================================================
+FOCUS: Reconcile stale docs against real codebase, then build Phase 2 in sequence:
+       verify -> A1 Stripe (subscriptions) -> app gaps (C1/C2) -> MCP later.
+STATUS: In progress.
+
+RECONCILIATION NOTE — this document was stale. A full codebase audit on 2026-05-26
+found that many items marked "NOT STARTED" below are ACTUALLY COMPLETE:
+  - Feature 2.2 Person Profile View .......... DONE (PersonProfileModal.tsx)
+  - Feature 2.3 Circle Dashboard ............. DONE (src/pages/Circle.tsx)
+  - Feature 2.4 Connection Web ............... DONE (connections service + UI)
+  - Phase 3 Chat / Voice / Claude AI ......... DONE (Chat.tsx, ai.ts, chat edge fn)
+  - Feature 6.1 Interaction Logging .......... DONE (LogInteractionModal + health calc)
+  - Feature 6.3 Reminders (UI) ............... DONE (widget + create modal; delivery fn pending)
+  - Bonus: consent/legal compliance .......... DONE (not in original plan)
+
+GENUINELY REMAINING (the real Phase 2 work):
+  - A1 Stripe monetization (no payment code exists; profiles has no tier columns)
+  - A4 api_keys table/service/UI (MCP prerequisite)
+  - MCP server (Part B) — entire mcp/ folder
+  - C1 summaries edge fn + Reflect page; C2 send-reminders edge fn
+  See PHASE2_PLAN.md "RECONCILED BUILD SEQUENCE" and ARCHITECTURE.md.
+
+LOCKED DECISIONS: subscriptions first; Free=10 msgs/mo (was 50); Starter $4.99 /
+  Growth $9.99 / Premium $19.99; new /me Account page; landing page must NOT change.
 
 ================================================================================
                               PROGRESS OVERVIEW
