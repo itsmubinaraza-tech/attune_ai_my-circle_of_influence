@@ -10,6 +10,7 @@ import { InstallPrompt, OfflineIndicator, UpdatePrompt } from "@/components/attu
 import Index from "./pages/Index";
 import Circle from "./pages/Circle";
 import Chat from "./pages/Chat";
+import Account from "./pages/Account";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -51,6 +52,14 @@ const App = () => (
             <Route
               path="/chat"
               element={<Chat />}
+            />
+            <Route
+              path="/me"
+              element={
+                <ProtectedRoute>
+                  <Account />
+                </ProtectedRoute>
+              }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -14,6 +14,7 @@ import {
   Mail,
   Phone,
   ChevronLeft,
+  UserCog,
   Loader2,
   UserX,
   Download,
@@ -234,6 +235,16 @@ export default function Circle() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Account */}
+              <button
+                onClick={() => navigate('/me')}
+                aria-label="Account and billing"
+                title="Account"
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-foreground/80 transition-all"
+              >
+                <UserCog className="w-4 h-4" />
+              </button>
+
               {/* Import Dropdown */}
               <div className="relative" ref={importMenuRef}>
                 <button
