@@ -1,4 +1,10 @@
--- Attune Database Schema
+-- Attune Database Schema (base reference)
+--
+-- ⚠️  For a FRESH project, run `supabase/bootstrap_fresh_project.sql` instead —
+--     it is the authoritative, up-to-date full schema (base + consent + Stripe +
+--     free-tier credits + the corrected reminders table). This file is kept as a
+--     historical base reference and has been corrected to match reality.
+--
 -- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/YOUR_PROJECT/sql
 
 -- Enable UUID extension
@@ -11,7 +17,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TYPE group_type AS ENUM ('work', 'family', 'friends', 'acquaintances');
 CREATE TYPE connection_type AS ENUM ('knows', 'works_with', 'related_to');
 CREATE TYPE interaction_outcome AS ENUM ('successful', 'partial', 'unsuccessful');
-CREATE TYPE reminder_type AS ENUM ('user_set', 'smart_nudge');
+-- NOTE: reminders use TEXT + CHECK (one_time | recurring | smart_nudge), not an enum. See reminders table below.
 
 -- ============================================
 -- PROFILES TABLE
@@ -228,19 +234,26 @@ CREATE POLICY "Users can update own credits" ON user_credits
 -- ============================================
 
 CREATE TABLE reminders (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
-  reminder_date TIMESTAMPTZ NOT NULL,
+  title TEXT NOT NULL,
   message TEXT,
-  is_completed BOOLEAN DEFAULT FALSE NOT NULL,
-  reminder_type reminder_type NOT NULL
+  reminder_type TEXT NOT NULL CHECK (reminder_type IN ('one_time', 'recurring', 'smart_nudge')),
+  scheduled_for TIMESTAMPTZ NOT NULL,
+  frequency TEXT CHECK (frequency IN ('daily', 'weekly', 'biweekly', 'monthly', 'quarterly')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'snoozed', 'dismissed')),
+  completed_at TIMESTAMPTZ,
+  snoozed_until TIMESTAMPTZ,
+  is_smart_nudge BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Create indexes
 CREATE INDEX idx_reminders_user_id ON reminders(user_id);
-CREATE INDEX idx_reminders_date ON reminders(reminder_date);
+CREATE INDEX idx_reminders_scheduled_for ON reminders(scheduled_for);
+CREATE INDEX idx_reminders_status ON reminders(status);
 
 -- Enable RLS
 ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
